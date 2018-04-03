@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -23,7 +22,7 @@ public class ShowTransActivity extends AppCompatActivity {
     private Firebase RefCat,RefFood,RefHealth,RefTravel,RefEdu,RefBills,RefHomeNeeds,RefOthers,RefUncat;
     private List<Transaction> transList = new ArrayList<>();
     private RecyclerView recyclerView;
-    private TransAdapter mAdapter;
+    private TransactionAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +45,7 @@ public class ShowTransActivity extends AppCompatActivity {
 
         recyclerView = (RecyclerView) findViewById(R.id.rv_alltrans);
 
-        mAdapter = new TransAdapter(transList);
+        mAdapter = new TransactionAdapter(transList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());

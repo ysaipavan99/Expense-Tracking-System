@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/content_analysis" />
 
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/rootLayout"
@@ -68,20 +67,18 @@
                 android:layout_gravity="center"
                 android:orientation="vertical">
 
-                <Spinner
-                    android:id="@+id/spinnerCategory"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:text="Categories" />
+
 
                 <Button
                     android:id="@+id/pressme"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="PRESS" />
+                <include layout="@layout/content_analysis"/>
+
             </LinearLayout>
         </android.support.v4.widget.NestedScrollView>
+
 
     </android.support.design.widget.CoordinatorLayout>
 

@@ -12,7 +12,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class AddCat extends AppCompatActivity {
     Button AddCategory;
-    EditText Cat;
+    EditText Cat,Bud;
     private Firebase mRootRef;
     private Firebase RefUid;
     private Firebase RefCat;
@@ -22,6 +22,7 @@ public class AddCat extends AppCompatActivity {
         setContentView(R.layout.activity_add_cat);
         AddCategory= findViewById(R.id.btAddCat);
         Cat= findViewById(R.id.CatName);
+        Bud= findViewById(R.id.CatBudg);
         mRootRef=new Firebase("https://expense-2a69a.firebaseio.com/");
 
         mRootRef.keepSynced(true);
@@ -35,9 +36,9 @@ public class AddCat extends AppCompatActivity {
             public void onClick(View v) {
 
                 String categ=Cat.getText().toString().trim();
-
+                String catbudg=Bud.getText().toString().trim();
                 RefCat.child(categ);
-                RefCat.child(categ).setValue("");
+                RefCat.child(categ).setValue(catbudg);
 
                 startActivity(new Intent(AddCat.this, ProfileManagement.class));
             }

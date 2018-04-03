@@ -3,8 +3,10 @@ package info.androidhive.firebase;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -19,36 +21,68 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.firebase.auth.FirebaseAuth;
 
+import org.apache.commons.collections4.map.MultiValueMap;
+
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 public class AnalysisActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemClickListener{
+        implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemClickListener, View.OnClickListener {
 
-    Spinner spin;
+    private Firebase mRootRef;
+    private Firebase RefUid;
+    private Firebase RefCatSum, RefTran,RefCat,OneRefCat;
+    private List<Transaction> transList = new ArrayList<>();
+    private RecyclerView recyclerView;
+    private TransactionAdapter mAdapter;
+
+    private ArrayList<String> Catg=new ArrayList<>();
+
+    List<String>catList = new ArrayList<>();
+    List<Integer>amtList = new ArrayList<>();
+
     CollapsingToolbarLayout collapsingToolbarLayout;
-    int flagTime=-1;
+    int flagTime = -1;
+    String SelCat;
     FirebaseAuth auth;
     Button press;
     ViewPager viewPage;
     LinearLayout sliderDots;
     int dotCount;
     private ImageView[] dots;
+    Button pressButton;
 
-    float amount[]={92.9f,100.1f,55.2f,36.6f,100.22f};
-    String categories[]={"Bills","Food","Travel","Business","Hotels"};
+    ArrayAdapter<CatTransSum> getSumCat;
+
+
+    MultiValueMap<String, String> catgTrans = MultiValueMap.multiValueMap(new LinkedHashMap<String,Collection<String>>(),(Class<LinkedHashSet<String>>) (Class<?>)LinkedHashSet.class);
+    int n;
+    Integer amount[];
+    String categories[];
+    int amtcatIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +90,7 @@ public class AnalysisActivity extends AppCompatActivity
         setContentView(R.layout.activity_analysis);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
        // setSupportActionBar(toolbar);
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -69,15 +104,36 @@ public class AnalysisActivity extends AppCompatActivity
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar_layout);
         collapsingToolbarLayout.setTitle("Analysis");
 
-        spin = (Spinner)findViewById(R.id.spinnerCategory);
-        String[] items = {"Pramo","Pavan","Arvind","Vishnu","Baps"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,items);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spin.setAdapter(adapter);
-        //spin.setOnItemClickListener(this);
+        pressButton = (Button)findViewById(R.id.pressme);
+
+
+        recyclerView = (RecyclerView) findViewById(R.id.rv_catanalysis);
+
+        mAdapter = new TransactionAdapter(transList);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(mAdapter);
+        /*Transaction t =new Transaction("132","Bills","Elec","12/6/17");
+        transList.add(t);
+        mAdapter.notifyDataSetChanged();*/
 
 
         auth = FirebaseAuth.getInstance();
+
+        mRootRef=new Firebase("https://expense-2a69a.firebaseio.com/");
+
+        mRootRef.keepSynced(true);
+        com.google.firebase.auth.FirebaseAuth auth = FirebaseAuth.getInstance();
+        String Uid=auth.getUid();
+        RefUid= mRootRef.child(Uid);
+        RefCat=RefUid.child("CatTran");
+
+        RefTran = RefUid.child("Transactions");
+        RefCatSum=RefUid.child("CatSum");
+
+
+
 
         press=(Button) findViewById(R.id.pressme);
         press.setOnClickListener(new View.OnClickListener() {
@@ -88,9 +144,53 @@ public class AnalysisActivity extends AppCompatActivity
             }
         });
 
-        setUpPieChart();
+        RefCatSum.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                String cat=dataSnapshot.getKey();
+                String amnt= dataSnapshot.getValue().toString().trim();
+                catList.add(cat);
+                amtList.add(Integer.parseInt(amnt));
+                /*
+                amount[amtcatIndex] = Integer.parseInt(amnt);
+                categories[amtcatIndex] = cat;
+                amtcatIndex++;*/
+                //Toast.makeText(getApplicationContext(),cat+","+amnt,Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+
+
+
+        pressButton.setOnClickListener(this);
 
     }
+
+
+
+
+
+
     private void setUpPieChart() {
 
         List<PieEntry> pieEntries = new ArrayList<>();
@@ -108,7 +208,95 @@ public class AnalysisActivity extends AppCompatActivity
         chart.setData(pieData);
         chart.animateY(1000);
         chart.invalidate();
+
+
+
+
+        chart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                PieEntry pe=(PieEntry) e;
+                SelCat=pe.getLabel();
+
+                transList.clear();
+                mAdapter.notifyDataSetChanged();
+                OneRefCat=RefCat.child(SelCat);
+
+                OneRefCat.addChildEventListener(new ChildEventListener() {
+                String amount,cat,shname,shDay,shMonth,shYear;
+
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    int i=0;
+
+                    for (DataSnapshot S:dataSnapshot.getChildren()) {
+                        //String t_id=S.getValue().toString().trim();
+                        //Toast.makeText(getApplicationContext(),"->"+i,Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(),t_id,Toast.LENGTH_SHORT).show();
+                        switch(i)
+                        {
+                            case 0:
+                                amount=S.getValue().toString().trim();
+                                break;
+                            case 1:
+                                cat=S.getValue().toString().trim();
+                                break;
+                            case 2:
+                                shDay=S.getValue().toString().trim();
+                                break;
+                            case 3:
+                                shMonth=S.getValue().toString().trim();
+                                break;
+                            case 4:
+                                shname=S.getValue().toString().trim();
+                                break;
+                            case 5:
+                                shYear=S.getValue().toString().trim();
+                                break;
+                        }
+                        //Transaction transaction=S.getValue(Transaction.class);
+                        //transList.add(transaction);
+                        i++;
+                    }
+                    String shdate= shDay+" - "+shMonth+" - "+shYear;
+                    Transaction transaction=new Transaction(amount,cat,shname,shdate);
+                    //Toast.makeText(getApplicationContext(),transaction.getT_amt(),Toast.LENGTH_SHORT).show();
+                    transList.add(transaction);
+                    mAdapter.notifyDataSetChanged();
+
+                }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
     }
+
 
     @Override
     public void onBackPressed() {
@@ -208,4 +396,12 @@ public class AnalysisActivity extends AppCompatActivity
 
     }
 
+    @Override
+    public void onClick(View v) {
+
+        amount = amtList.toArray(new Integer[amtList.size()]);
+        categories = catList.toArray(new String[catList.size()]);
+        setUpPieChart();
+
+    }
 }

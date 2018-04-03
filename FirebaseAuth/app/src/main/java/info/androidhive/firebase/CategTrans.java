@@ -72,6 +72,9 @@ public class CategTrans extends AppCompatActivity {
         });
 
 
+
+
+
         catView.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             public void onItemClick(AdapterView<?> arg0,View arg1, int pos, long arg3)

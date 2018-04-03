@@ -1,10 +1,14 @@
 package info.androidhive.firebase;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -24,6 +28,7 @@ public class SetBud extends AppCompatActivity {
     private Firebase mRootRef;
     private Firebase RefUid;
     private Firebase RefCat;
+    TextView t1,t2;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,17 +38,13 @@ public class SetBud extends AppCompatActivity {
 
         final List<Map<String, String>> data = new ArrayList<Map<String, String>>();
 
-        final SimpleAdapter adapter = new SimpleAdapter(this, data, android.R.layout.simple_list_item_2, new String[] {"Cat", "Bud"}, new int[] {android.R.id.text1, android.R.id.text2});
+        final SimpleAdapter adapter = new SimpleAdapter(this, data, R.layout.setbudlist, new String[] {"Cat", "Bud"}, new int[] {R.id.text1, R.id.text2});
+
 
 
         catBudView.setAdapter(adapter);
 
-       /*
-        final ArrayAdapter<String> arrayAdapter1=new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,CatgBudg);
-        final ArrayAdapter<String> arrayAdapter2=new ArrayAdapter<String>(this,android.R.layout.simple_list_item_2,Catg);
-        catBudView.setAdapter(arrayAdapter1);
-        catBudView.setAdapter(arrayAdapter2);
-*/
+
         mRootRef=new Firebase("https://expense-2a69a.firebaseio.com/");
 
         mRootRef.keepSynced(true);
@@ -87,6 +88,20 @@ public class SetBud extends AppCompatActivity {
             @Override
             public void onCancelled(FirebaseError firebaseError) {
 
+            }
+        });
+
+
+        catBudView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            public void onItemClick(AdapterView<?> arg0, View arg1, int pos, long arg3)
+            {
+                Intent n = new Intent(getApplicationContext(), EditBud.class);
+                HashMap<String, String> datum1 = new HashMap<String, String>(2);
+                datum1=(HashMap<String,String>) adapter.getItem(pos);
+                String result= datum1.get("Cat");
+                n.putExtra("name", result);
+                startActivity(n);
             }
         });
 /*

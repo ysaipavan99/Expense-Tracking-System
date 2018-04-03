@@ -16,6 +16,13 @@
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
         android:hint="Category Name" />
+
+    <EditText
+        android:id="@+id/CatBudg"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:hint="Set Budget" />
     <Button
         android:id="@+id/btAddCat"
         android:layout_width="fill_parent"

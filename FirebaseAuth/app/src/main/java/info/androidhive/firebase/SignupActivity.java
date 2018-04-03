@@ -1,7 +1,11 @@
 package info.androidhive.firebase;
 
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.AnyRes;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -13,9 +17,15 @@ import android.widget.Toast;
 
 import com.firebase.client.Firebase;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import java.io.InputStream;
 
 public class  SignupActivity extends AppCompatActivity {
 
@@ -31,6 +41,8 @@ public class  SignupActivity extends AppCompatActivity {
     private Firebase RefPhnnum;
     private Firebase RefCat,RefFood,RefHealth,RefTravel,RefEdu,RefBills,RefHomeNeeds,RefOthers,RefUncat,RefAddress;
 
+    private StorageReference storageReference,filepath;
+
 
     private Button btnSignIn, btnSignUp, btnResetPassword;
     private ProgressBar progressBar;
@@ -44,6 +56,7 @@ public class  SignupActivity extends AppCompatActivity {
         //Get Firebase auth instance
         auth = FirebaseAuth.getInstance();
         mRootRef = new Firebase("https://expense-2a69a.firebaseio.com/");
+        storageReference = FirebaseStorage.getInstance().getReference();
 
         btnSignIn = (Button) findViewById(R.id.sign_in_button);
         btnSignUp = (Button) findViewById(R.id.sign_up_button);
@@ -136,6 +149,11 @@ public class  SignupActivity extends AppCompatActivity {
                                     RefEmail.setValue(email);
                                     RefPhnnum=RefUid.child("Phone Number");
                                     RefPhnnum.setValue(Phnnum);
+                                    RefAddress=RefUid.child("Address");
+                                    RefAddress.setValue("Add Address");
+                                    RefUid.child("Day").setValue("0");
+                                    RefUid.child("Month").setValue("0");
+                                    RefUid.child("Year").setValue("0");
 
                                     RefCat=RefUid.child("Categories");
                                     RefFood=RefCat.child("Food");
@@ -154,10 +172,20 @@ public class  SignupActivity extends AppCompatActivity {
                                     RefOthers.setValue("");
                                     //RefUncat=RefCat.child("Uncategorised");
                                     //RefUncat.setValue("");
+                                    filepath=storageReference.child("Profile Image").child(Uid+".jpg");
+
+                                    Uri imuri=getUriToDrawable(getApplicationContext(),R.drawable.def_profile_pic);
 
 
+                                    filepath = storageReference.child("Profile Image").child(Uid+".jpg");
+                                    filepath.putFile(imuri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                        @Override
+                                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                            Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                                            //Toast.makeText(getApplicationContext(),downloadUrl.toString(),Toast.LENGTH_LONG).show();
 
-
+                                        }
+                                    });
 
 
 
@@ -178,5 +206,14 @@ public class  SignupActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         progressBar.setVisibility(View.GONE);
+    }
+
+    public static final Uri getUriToDrawable(@NonNull Context context,
+                                             @AnyRes int drawableId) {
+        Uri imageUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
+                "://" + context.getResources().getResourcePackageName(drawableId)
+                + '/' + context.getResources().getResourceTypeName(drawableId)
+                + '/' + context.getResources().getResourceEntryName(drawableId) );
+        return imageUri;
     }
 }
