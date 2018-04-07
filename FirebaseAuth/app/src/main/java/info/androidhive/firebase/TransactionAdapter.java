@@ -1,6 +1,5 @@
 package info.androidhive.firebase;
 
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -96,9 +95,10 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
         @Override
         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+
             menu.setHeaderTitle("Select an action");
-            menu.add(0,1,0,"Delete");
-            menu.add(0,2,0,"Change category");
+            menu.add(getAdapterPosition(),1,0,"Delete");
+            menu.add(getAdapterPosition(),2,0,"Change category");
 
         }
     }
@@ -108,10 +108,6 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
     }
 
-    public void setOnItemLongClickListener(ClickListener clickListener){
-        TransactionAdapter.mClickListener = clickListener;
-
-    }
 
     public interface ClickListener{
         void OnItemClick(int position, View v);

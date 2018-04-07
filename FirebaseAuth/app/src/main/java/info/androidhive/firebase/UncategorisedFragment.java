@@ -12,11 +12,8 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
-import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,16 +39,16 @@ public class UncategorisedFragment extends Fragment {
     private TextView textView;
 
     private Context context;
-    private List<Transaction> TransactionList = new ArrayList<>();
-    private RecyclerView recyclerView;
-    private TransactionAdapter mAdapter;
+    private List<Transaction> TransactionListUF = new ArrayList<>();
+    private RecyclerView recyclerViewUF;
+    private TransactionAdapter mAdapterUF;
 
     public static Fragment getInstance(int position) {
         Bundle bundle = new Bundle();
-        bundle.putInt("pos", position);
-        TabFragment tabFragment = new TabFragment();
-        tabFragment.setArguments(bundle);
-        return tabFragment;
+        bundle.putInt("pos2", position);
+        UncategorisedFragment uncategorisedFragment = new UncategorisedFragment();
+        uncategorisedFragment.setArguments(bundle);
+        return uncategorisedFragment;
     }
     public UncategorisedFragment() {
         // Required empty public constructor
@@ -83,24 +80,24 @@ public class UncategorisedFragment extends Fragment {
 
 
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.rv_uncat);
+        recyclerViewUF = (RecyclerView) view.findViewById(R.id.rv_uncat);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(view.getContext());
-        recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        mAdapter = new TransactionAdapter(TransactionList);
-        recyclerView.setAdapter(mAdapter);
+        recyclerViewUF.setLayoutManager(mLayoutManager);
+        recyclerViewUF.setItemAnimator(new DefaultItemAnimator());
+        mAdapterUF = new TransactionAdapter(TransactionListUF);
+        recyclerViewUF.setAdapter(mAdapterUF);
         prepareTransactionData();
-        registerForContextMenu(recyclerView);
+        registerForContextMenu(recyclerViewUF);
 
 
-        mAdapter.setOnItemClickListener(new TransactionAdapter.ClickListener() {
+        mAdapterUF.setOnItemClickListener(new TransactionAdapter.ClickListener() {
             @Override
             public void OnItemClick(int position, View v) {
                 //Toast.makeText(getActivity(),TransactionList.get(position).getTid(),Toast.LENGTH_SHORT).show();
 
                 Intent i = new Intent(getActivity(),SMSTransShow.class);
-                i.putExtra("indexPos",TransactionList.get(position).getTid());
+                i.putExtra("indexPos",TransactionListUF.get(position).getTid());
                 startActivity(i);
             }
 
@@ -118,20 +115,19 @@ public class UncategorisedFragment extends Fragment {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        //AdapterView.AdapterContextMenuInfo info=(AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        //int index = info.position;
-        //View view=info.targetView;
 
         switch(item.getItemId())
         {
             case 1:{
-                tagId=TransactionList.get(pos).getTid();
+                int show = item.getGroupId();
+                tagId=TransactionListUF.get(show).getTid();
                 Toast.makeText(getActivity(),tagId+"-"+"Delete it",Toast.LENGTH_SHORT).show();
 
             }break;
 
             case 2:{
-                tagId=TransactionList.get(pos).getTid();
+                int show = item.getGroupId();
+                tagId=TransactionListUF.get(show).getTid();
                 Toast.makeText(getActivity(),tagId+"-"+"Change it",Toast.LENGTH_SHORT).show();
 
             }break;
@@ -181,8 +177,8 @@ public class UncategorisedFragment extends Fragment {
                 String shdate= shDay+" - "+shMonth+" - "+shYear;
                 Transaction transaction=new Transaction(tid,amount,cat,shname,shdate);
                 //Toast.makeText(getApplicationContext(),transaction.getT_amt(),Toast.LENGTH_SHORT).show();
-                TransactionList.add(transaction);
-                mAdapter.notifyDataSetChanged();
+                TransactionListUF.add(transaction);
+                mAdapterUF.notifyDataSetChanged();
             }
 
             @Override
