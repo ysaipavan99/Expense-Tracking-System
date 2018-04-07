@@ -7,10 +7,13 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -28,16 +31,17 @@ import java.util.List;
 public class TabFragment extends Fragment {
     private Firebase mRootRef;
     private Firebase RefUid,RefTran;
-    int position;
+    int pos;
+    private String tagId;
     private TextView textView;
 
     private List<Transaction> TransactionList = new ArrayList<>();
     private RecyclerView recyclerView;
-    private TransactionAdapter mAdapter1;
+    private TransAdapter mAdapter1;
 
     public static Fragment getInstance(int position) {
         Bundle bundle = new Bundle();
-        bundle.putInt("pos", position);
+        bundle.putInt("pos1", position);
         TabFragment tabFragment = new TabFragment();
         tabFragment.setArguments(bundle);
         return tabFragment;
@@ -51,9 +55,6 @@ public class TabFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
-
-
         return inflater.inflate(R.layout.fragment_tab, container, false);
 
 
@@ -80,18 +81,50 @@ public class TabFragment extends Fragment {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(view.getContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        mAdapter1 = new TransactionAdapter(TransactionList);
+        mAdapter1 = new TransAdapter(TransactionList);
         recyclerView.setAdapter(mAdapter1);
         prepareTransactionData();
 
 
-        recyclerView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        registerForContextMenu(recyclerView);
 
+
+        mAdapter1.setOnItemClickListener(new TransAdapter.ClickListener() {
+            @Override
+            public void OnItemClick(int position, View v) {
+                Toast.makeText(getActivity(),TransactionList.get(position).getTid(),Toast.LENGTH_SHORT).show();
+
+            }
+
+            @Override
+            public void OnItemLongClick(int position, View v) {
+                Log.i("yoyoyo","Here: "+position);
+                pos=position;
             }
         });
 
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+
+        switch(item.getItemId())
+        {
+            case 1:{
+                int show = item.getGroupId();
+                tagId=TransactionList.get(show).getTid();
+                Toast.makeText(getActivity(),tagId+"-"+"Delete it",Toast.LENGTH_SHORT).show();
+
+            }break;
+
+            case 2:{
+                int show = item.getGroupId();
+                tagId=TransactionList.get(show).getTid();
+                Toast.makeText(getActivity(),tagId+"-"+"Change it",Toast.LENGTH_SHORT).show();
+
+            }break;
+        }
+        return super.onContextItemSelected(item);
     }
 
     private void prepareTransactionData() {
