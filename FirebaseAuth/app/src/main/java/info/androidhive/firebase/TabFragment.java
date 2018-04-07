@@ -28,13 +28,12 @@ import java.util.List;
 public class TabFragment extends Fragment {
     private Firebase mRootRef;
     private Firebase RefUid,RefTran;
-    private Firebase RefCat;
     int position;
     private TextView textView;
 
     private List<Transaction> TransactionList = new ArrayList<>();
     private RecyclerView recyclerView;
-    private TransactionAdapter mAdapter;
+    private TransactionAdapter mAdapter1;
 
     public static Fragment getInstance(int position) {
         Bundle bundle = new Bundle();
@@ -75,18 +74,23 @@ public class TabFragment extends Fragment {
         RefUid= mRootRef.child(Uid);
         RefTran = RefUid.child("Transactions");
 
-        RefCat=RefUid.child("Categories");
 
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(view.getContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        mAdapter = new TransactionAdapter(TransactionList);
-        recyclerView.setAdapter(mAdapter);
+        mAdapter1 = new TransactionAdapter(TransactionList);
+        recyclerView.setAdapter(mAdapter1);
         prepareTransactionData();
 
 
+        recyclerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
     }
 
@@ -98,6 +102,7 @@ public class TabFragment extends Fragment {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 int i=0;
 
+                String tid = dataSnapshot.getKey().toString().trim();
                 for (DataSnapshot S:dataSnapshot.getChildren()) {
                     //String t_id=S.getValue().toString().trim();
                     //Toast.makeText(getApplicationContext(),"->"+i,Toast.LENGTH_SHORT).show();
@@ -128,10 +133,10 @@ public class TabFragment extends Fragment {
                     i++;
                 }
                 String shdate= shDay+" - "+shMonth+" - "+shYear;
-                Transaction transaction=new Transaction(amount,cat,shname,shdate);
+                Transaction transaction=new Transaction(tid,amount,cat,shname,shdate);
                 //Toast.makeText(getApplicationContext(),transaction.getT_amt(),Toast.LENGTH_SHORT).show();
                 TransactionList.add(transaction);
-                mAdapter.notifyDataSetChanged();
+                mAdapter1.notifyDataSetChanged();
             }
 
             @Override

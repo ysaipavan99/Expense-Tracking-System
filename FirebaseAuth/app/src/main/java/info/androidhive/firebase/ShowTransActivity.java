@@ -5,11 +5,13 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
@@ -61,6 +63,7 @@ public class ShowTransActivity extends AppCompatActivity {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 int i=0;
+                String tid = dataSnapshot.getKey().toString().trim();
 
                 for (DataSnapshot S:dataSnapshot.getChildren()) {
                     //String t_id=S.getValue().toString().trim();
@@ -92,7 +95,11 @@ public class ShowTransActivity extends AppCompatActivity {
                     i++;
                 }
                 String shdate= shDay+" - "+shMonth+" - "+shYear;
-                Transaction transaction=new Transaction(amount,cat,shname,shdate);
+                Transaction transaction=new Transaction(tid,amount,cat,shname,shdate);
+                amount="";
+                cat="";
+                shname="";
+                shdate="";
                 //Toast.makeText(getApplicationContext(),transaction.getT_amt(),Toast.LENGTH_SHORT).show();
                 transList.add(transaction);
                 mAdapter.notifyDataSetChanged();

@@ -1,6 +1,9 @@
 package info.androidhive.firebase;
 
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.view.ViewPager;
@@ -16,9 +19,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -43,6 +48,7 @@ import org.apache.commons.collections4.map.MultiValueMap;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -59,6 +65,7 @@ public class AnalysisActivity extends AppCompatActivity
     private RecyclerView recyclerView;
     private TransactionAdapter mAdapter;
 
+    private DatePicker dp;
     private ArrayList<String> Catg=new ArrayList<>();
 
     List<String>catList = new ArrayList<>();
@@ -105,6 +112,7 @@ public class AnalysisActivity extends AppCompatActivity
         collapsingToolbarLayout.setTitle("Analysis");
 
         pressButton = (Button)findViewById(R.id.pressme);
+
 
 
         recyclerView = (RecyclerView) findViewById(R.id.rv_catanalysis);
@@ -184,6 +192,26 @@ public class AnalysisActivity extends AppCompatActivity
 
         pressButton.setOnClickListener(this);
 
+        //Month and Year picker
+        int mYear,mMonth,mDay;
+        Calendar c = Calendar.getInstance();
+        mYear = c.get(Calendar.YEAR);
+        mMonth = c.get(Calendar.MONTH);
+        mDay = c.get(Calendar.DAY_OF_MONTH);
+        DatePickerDialog datePickerDialog = new DatePickerDialog(AnalysisActivity.this, AlertDialog.THEME_HOLO_DARK,
+                new DatePickerDialog.OnDateSetListener() {
+
+                    @Override
+                    public void onDateSet(DatePicker view, int year,
+                                          int monthOfYear, int dayOfMonth) {
+
+                        Toast.makeText(getApplicationContext(),dayOfMonth + "-" + (monthOfYear + 1) + "-" + year,Toast.LENGTH_LONG).show();
+
+                    }
+                }, mYear, mMonth, mDay);
+        ((ViewGroup) datePickerDialog.getDatePicker()).findViewById(Resources.getSystem().getIdentifier("day", "id", "android")).setVisibility(View.GONE);
+        datePickerDialog.show();
+
     }
 
 
@@ -229,6 +257,7 @@ public class AnalysisActivity extends AppCompatActivity
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                     int i=0;
 
+                    String tid = dataSnapshot.getKey().toString().trim();
                     for (DataSnapshot S:dataSnapshot.getChildren()) {
                         //String t_id=S.getValue().toString().trim();
                         //Toast.makeText(getApplicationContext(),"->"+i,Toast.LENGTH_SHORT).show();
@@ -259,7 +288,7 @@ public class AnalysisActivity extends AppCompatActivity
                         i++;
                     }
                     String shdate= shDay+" - "+shMonth+" - "+shYear;
-                    Transaction transaction=new Transaction(amount,cat,shname,shdate);
+                    Transaction transaction=new Transaction(tid,amount,cat,shname,shdate);
                     //Toast.makeText(getApplicationContext(),transaction.getT_amt(),Toast.LENGTH_SHORT).show();
                     transList.add(transaction);
                     mAdapter.notifyDataSetChanged();
@@ -311,7 +340,7 @@ public class AnalysisActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.analysis, menu);
+        getMenuInflater().inflate(R.menu.home, menu);
         return true;
     }
     @Override
@@ -322,26 +351,31 @@ public class AnalysisActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-           /* Intent i=new Intent(this,PrefSettings.class);
-            startActivity(i);*/
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.account_settings) {
+            Intent i=new Intent(this,MainActivity.class);
+            startActivity(i);
+        }
+        else if(id== R.id.action_settings)
+        {
+            Intent i=new Intent(this,PrefSettingsActivity.class);
+            startActivity(i);
         }
 
         else if(id==R.id.action_contact_us){
-           // Intent i=new Intent(this,ContactUs.class);
-            //startActivity(i);
+            Intent i=new Intent(this,ContactUs.class);
+            startActivity(i);
 
         }
 
         return super.onOptionsItemSelected(item);
     }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-/*
+
         if (id == R.id.nav_home) {
 
             Intent i=new Intent(this,HomeActivity.class);
@@ -369,7 +403,7 @@ public class AnalysisActivity extends AppCompatActivity
             startActivity(i);
 
         }
-        else if (id == R.id.nav_rate) {
+       else if (id == R.id.nav_rate) {
 
             Intent i=new Intent(this,Rate.class);
             startActivity(i);
@@ -381,9 +415,15 @@ public class AnalysisActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_share) {
 
+            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+            sharingIntent.setType("text/plain");
+            String shareBody = "I recommend you to try this app and comment about it";
+            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "XpensAuditor");
+            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+            startActivity(Intent.createChooser(sharingIntent, "Share via"));
 
         }
-*/
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;

@@ -8,9 +8,12 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="android.permission.READ_SMS"/>
-    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
-    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.WRITE_SMS" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.SEND_EMAIL" />
 
     <application
         android:name=".FirebaseAuth"
@@ -77,13 +80,23 @@
         <activity
             android:name=".HomeActivity"
             android:label="@string/title_activity_home"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <receiver android:name=".SMSReceiver"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <receiver
+            android:name=".SMSReceiver"
             android:enabled="true">
             <intent-filter android:priority="2147483647">
-                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
+
+        <activity android:name=".Rate" />
+        <activity android:name=".Suggest" />
+        <activity android:name=".ContactUs" />
+        <activity android:name=".PrefSettingsActivity" />
+        <activity android:name=".PercentExpense" />
+        <activity android:name=".CatExpPer" />
+        <activity android:name=".SMSTransShow"></activity>
     </application>
 
 </manifest>

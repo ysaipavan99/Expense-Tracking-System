@@ -61,6 +61,7 @@ public class OneCatTran extends AppCompatActivity {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 int i=0;
 
+                String tid = dataSnapshot.getKey().toString().trim();
                 for (DataSnapshot S:dataSnapshot.getChildren()) {
                     //String t_id=S.getValue().toString().trim();
                     //Toast.makeText(getApplicationContext(),"->"+i,Toast.LENGTH_SHORT).show();
@@ -91,7 +92,7 @@ public class OneCatTran extends AppCompatActivity {
                     i++;
                 }
                 String shdate= shDay+" - "+shMonth+" - "+shYear;
-                Transaction transaction=new Transaction(amount,cat,shname,shdate);
+                Transaction transaction=new Transaction(tid,amount,cat,shname,shdate);
                 //Toast.makeText(getApplicationContext(),transaction.getT_amt(),Toast.LENGTH_SHORT).show();
                 transList.add(transaction);
                 mAdapter.notifyDataSetChanged();

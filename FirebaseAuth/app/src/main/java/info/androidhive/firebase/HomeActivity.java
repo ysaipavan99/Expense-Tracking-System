@@ -16,13 +16,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
-    private com.google.firebase.auth.FirebaseAuth auth;
+    FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +37,8 @@ public class HomeActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*Intent i=new Intent(getApplicationContext(),ProfileManagementActivity.class);
-                startActivity(i);*/
+                Intent i=new Intent(getApplicationContext(),Transac.class);
+                startActivity(i);
             }
         });
 
@@ -48,6 +50,9 @@ public class HomeActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        auth = FirebaseAuth.getInstance();
+
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         /*ViewPageAdapter adapter = new ViewPageAdapter(getSupportFragmentManager());
@@ -93,16 +98,21 @@ public class HomeActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         //noinspection SimplifiableIfStatement
-   /*     if (id == R.id.action_settings) {
-           *//* Intent i=new Intent(this,PrefSettings.class);
-            startActivity(i);*//*
+        if (id == R.id.account_settings) {
+            Intent i=new Intent(this,MainActivity.class);
+            startActivity(i);
+        }
+        else if(id== R.id.action_settings)
+        {
+            Intent i=new Intent(this,PrefSettingsActivity.class);
+            startActivity(i);
         }
 
         else if(id==R.id.action_contact_us){
             Intent i=new Intent(this,ContactUs.class);
             startActivity(i);
 
-        }*/
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -112,7 +122,7 @@ public class HomeActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-/*
+
 
         if (id == R.id.nav_home) {
 
@@ -143,7 +153,7 @@ public class HomeActivity extends AppCompatActivity
         }
         else if (id == R.id.nav_rate) {
 
-            Intent i=new Intent(this,Rate.class);
+            Intent i = new Intent(this, Rate.class);
             startActivity(i);
 
         } else if (id == R.id.nav_suggest) {
@@ -153,9 +163,14 @@ public class HomeActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_share) {
 
-
+            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+            sharingIntent.setType("text/plain");
+            String shareBody = "I recommend you to try this app and comment about it";
+            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "XpensAuditor");
+            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+            startActivity(Intent.createChooser(sharingIntent, "Share via"));
         }
-*/
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

@@ -99,6 +99,9 @@ public class SettingsActivity extends AppCompatActivity
                 else if(check.equals("% expense before alert"))
                 {
 
+                    Intent i = new Intent(SettingsActivity.this,PercentExpense.class);
+                    startActivity(i);
+
                 }
 
                 else if(check.equals("Add new category"))
@@ -157,7 +160,7 @@ public class SettingsActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.settings, menu);
+        getMenuInflater().inflate(R.menu.home, menu);
         return true;
     }
 
@@ -169,8 +172,21 @@ public class SettingsActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.account_settings) {
+            Intent i=new Intent(this,MainActivity.class);
+            startActivity(i);
+        }
+        else if(id== R.id.action_settings)
+        {
+            Intent i=new Intent(this,PrefSettingsActivity.class);
+            startActivity(i);
+        }
+
+        else if(id==R.id.action_contact_us){
+            Intent i=new Intent(this,ContactUs.class);
+            startActivity(i);
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -182,20 +198,53 @@ public class SettingsActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.nav_home) {
 
-        } else if (id == R.id.nav_slideshow) {
+            Intent i=new Intent(this,HomeActivity.class);
+            startActivity(i);
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.nav_profile) {
+
+            Intent i=new Intent(this,ProfileActivity.class);
+            startActivity(i);
+
+        } else if (id == R.id.nav_show_analysis) {
+
+            Intent i=new Intent(this,AnalysisActivity.class);
+            startActivity(i);
+
+        } else if (id == R.id.nav_settings) {
+
+            Intent i=new Intent(this,SettingsActivity.class);
+            startActivity(i);
+
+        } else if (id == R.id.nav_logout) {
+
+            auth.signOut();
+            Intent i = new Intent(this,LoginActivity.class);
+            startActivity(i);
+
+        }
+        else if (id == R.id.nav_rate) {
+
+            Intent i=new Intent(this,Rate.class);
+            startActivity(i);
+
+        } else if (id == R.id.nav_suggest) {
+
+            Intent i=new Intent(this,Suggest.class);
+            startActivity(i);
 
         } else if (id == R.id.nav_share) {
 
-        } else if (id == R.id.nav_send) {
+            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+            sharingIntent.setType("text/plain");
+            String shareBody = "I recommend you to try this app and comment about it";
+            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "XpensAuditor");
+            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+            startActivity(Intent.createChooser(sharingIntent, "Share via"));
 
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;

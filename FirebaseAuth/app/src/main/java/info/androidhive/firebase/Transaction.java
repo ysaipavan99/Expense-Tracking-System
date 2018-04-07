@@ -2,22 +2,26 @@ package info.androidhive.firebase;
 
 public class Transaction {
 
-    private String t_shopname, t_amt,t_cat,t_date;
+    private String tid, t_shopname, t_amt,t_cat,t_date;
 
     public Transaction() {
     }
 
-    public Transaction( String t_amt, String t_cat,String t_shopname,String t_date) {
+    public Transaction( String tid, String t_amt, String t_cat,String t_shopname,String t_date) {
+        this.tid = tid;
         this.t_amt=t_amt;
         this.t_cat=t_cat;
         this.t_shopname=t_shopname;
         this.t_date=t_date;
     }
 
+    public String getTid() {
+        return tid;
+    }
+
     public String getT_amt() {
         return t_amt;
     }
-
 
     public String getT_cat() {
         return t_cat;

@@ -49,6 +49,8 @@ import static android.provider.CalendarContract.CalendarCache.URI;
 public class ProfileActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+
+    com.google.firebase.auth.FirebaseAuth auth;
     private TextView NameView, EmailView, PhnView, UserDOB, UserAddress;
     private Firebase mRootRef;
     private Firebase RefUid;
@@ -78,10 +80,11 @@ public class ProfileActivity extends AppCompatActivity
         UserDOB = (TextView) findViewById(R.id.userDOB);
         editProf = (ImageButton) findViewById(R.id.editProfile);
 
+        auth= FirebaseAuth.getInstance();
+
 
         mRootRef = new Firebase("https://expense-2a69a.firebaseio.com/");
         mRootRef.keepSynced(true);
-        com.google.firebase.auth.FirebaseAuth auth = FirebaseAuth.getInstance();
         Uid = auth.getUid();
         RefUid = mRootRef.child(Uid);
         RefName = RefUid.child("Name");
@@ -95,6 +98,7 @@ public class ProfileActivity extends AppCompatActivity
         storageReference = FirebaseStorage.getInstance().getReference();
 
         userImage = (ImageView) findViewById(R.id.userImage);
+
 
 
         storageRef=storageReference.child("Profile Image").child(Uid+".jpg");
@@ -300,7 +304,7 @@ public class ProfileActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.profile, menu);
+        getMenuInflater().inflate(R.menu.home, menu);
         return true;
     }
 
@@ -312,32 +316,80 @@ public class ProfileActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.account_settings) {
+            Intent i=new Intent(this,MainActivity.class);
+            startActivity(i);
+        }
+        else if(id== R.id.action_settings)
+        {
+            Intent i=new Intent(this,PrefSettingsActivity.class);
+            startActivity(i);
+        }
+
+        else if(id==R.id.action_contact_us){
+            Intent i=new Intent(this,ContactUs.class);
+            startActivity(i);
+
         }
 
         return super.onOptionsItemSelected(item);
     }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
 
-        } else if (id == R.id.nav_slideshow) {
+        if (id == R.id.nav_home) {
 
-        } else if (id == R.id.nav_manage) {
+            Intent i=new Intent(this,HomeActivity.class);
+            startActivity(i);
+
+        } else if (id == R.id.nav_profile) {
+
+            Intent i=new Intent(this,ProfileActivity.class);
+            startActivity(i);
+
+        } else if (id == R.id.nav_show_analysis) {
+
+            Intent i=new Intent(this,AnalysisActivity.class);
+            startActivity(i);
+
+        } else if (id == R.id.nav_settings) {
+
+            Intent i=new Intent(this,SettingsActivity.class);
+            startActivity(i);
+
+        } else if (id == R.id.nav_logout) {
+
+            auth.signOut();
+            Intent i = new Intent(this,LoginActivity.class);
+            startActivity(i);
+
+        }
+        else if (id == R.id.nav_rate) {
+
+            Intent i=new Intent(this,Rate.class);
+            startActivity(i);
+
+        } else if (id == R.id.nav_suggest) {
+
+            Intent i=new Intent(this,Suggest.class);
+            startActivity(i);
 
         } else if (id == R.id.nav_share) {
 
-        } else if (id == R.id.nav_send) {
+            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+            sharingIntent.setType("text/plain");
+            String shareBody = "I recommend you to try this app and comment about it";
+            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "XpensAuditor");
+            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+            startActivity(Intent.createChooser(sharingIntent, "Share via"));
 
         }
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
