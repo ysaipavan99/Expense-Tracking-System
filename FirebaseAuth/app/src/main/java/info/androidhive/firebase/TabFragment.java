@@ -19,6 +19,7 @@ import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
@@ -31,9 +32,9 @@ import java.util.List;
  */
 public class TabFragment extends Fragment {
     private Firebase mRootRef;
-    private Firebase RefUid,RefTran;
-    int pos;
-    private String tagId;
+    private Firebase RefUid,RefTran,RefCatTran,RefCatSum;
+    int pos, intSum;
+    private String tagId, delCategory, delAmt;
     private TextView textView;
 
     private List<Transaction> TransactionList = new ArrayList<>();
@@ -75,6 +76,8 @@ public class TabFragment extends Fragment {
         String Uid=auth.getUid();
         RefUid= mRootRef.child(Uid);
         RefTran = RefUid.child("Transactions");
+        RefCatTran = RefUid.child("CatTran");
+        RefCatSum = RefUid.child("CatSum");
 
         Calendar calendar = Calendar.getInstance();
         int currentDay = (calendar.get(Calendar.DAY_OF_MONTH));
@@ -119,7 +122,43 @@ public class TabFragment extends Fragment {
             case 11:{
                 int show = item.getGroupId();
                 tagId=TransactionList.get(show).getTid();
-                Toast.makeText(getActivity(),tagId+"-"+"Delete it",Toast.LENGTH_SHORT).show();
+                delCategory = TransactionList.get(show).getT_cat();
+                delAmt = TransactionList.get(show).getT_amt();
+
+                // Toast.makeText(getActivity(),tagId+"-"+"Delete it",Toast.LENGTH_SHORT).show();
+
+                RefTran.child(tagId).removeValue();
+                RefCatTran.child(delCategory).child(tagId).removeValue();
+                RefCatSum.child(delCategory).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        String sumCat = dataSnapshot.getValue().toString().trim();
+                        intSum = Integer.parseInt(sumCat);
+                        Integer newDelAmt = Integer.parseInt(delAmt);
+                        intSum = intSum - newDelAmt;
+                        if(intSum==0)
+                            dataSnapshot.getRef().removeValue();
+                        else
+                            dataSnapshot.getRef().setValue(String.valueOf(intSum));
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+
+                    }
+                });
+
+
+
+
+
+                TransactionList.clear();
+                prepareTransactionData();
+
+
+
+
+
 
             }break;
 
@@ -134,12 +173,15 @@ public class TabFragment extends Fragment {
     }
 
     private void prepareTransactionData() {
+
         RefTran.addChildEventListener(new ChildEventListener() {
             String amount,cat,shname,shDay,shMonth,shYear;
+
 
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 int i=0;
+
 
                 String tid = dataSnapshot.getKey().toString().trim();
                 for (DataSnapshot S:dataSnapshot.getChildren()) {

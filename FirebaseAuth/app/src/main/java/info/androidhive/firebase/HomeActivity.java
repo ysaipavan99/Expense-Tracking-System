@@ -78,7 +78,7 @@ public class HomeActivity extends AppCompatActivity
         //Changing contents of navigation header
         mRootRef=new Firebase("https://expense-2a69a.firebaseio.com/");
         mRootRef.keepSynced(true);
-        com.google.firebase.auth.FirebaseAuth auth = FirebaseAuth.getInstance();
+        auth = FirebaseAuth.getInstance();
         Uid=auth.getUid();
         RefUid= mRootRef.child(Uid);
         RefName = RefUid.child("Name");

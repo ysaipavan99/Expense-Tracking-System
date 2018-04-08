@@ -52,7 +52,6 @@ public class UncategorisedFragment extends Fragment {
     }
     public UncategorisedFragment() {
         // Required empty public constructor
-        this.context = context;
     }
 
 
@@ -121,8 +120,47 @@ public class UncategorisedFragment extends Fragment {
             case 21:{
                 int show = item.getGroupId();
                 tagId=TransactionListUF.get(show).getTid();
-                Toast.makeText(getActivity(),tagId+"-"+"Delete it",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getActivity(),tagId+"-"+"Delete it",Toast.LENGTH_SHORT).show();
 
+
+                RefTran.addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        String checkID = dataSnapshot.getKey().toString().trim();
+                        if(tagId.equals(checkID)) {
+                            dataSnapshot.getRef().removeValue(new Firebase.CompletionListener() {
+                                @Override
+                                public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+                                    //Toast.makeText(getActivity(), tagId + "-Deleted", Toast.LENGTH_LONG).show();
+                                    TransactionListUF.clear();
+                                    prepareTransactionData();
+
+                                }
+                            });
+                        }
+
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+
+                    }
+                });
             }break;
 
             case 22:{
@@ -204,6 +242,7 @@ public class UncategorisedFragment extends Fragment {
 
 
     }
+
 
 }
 
