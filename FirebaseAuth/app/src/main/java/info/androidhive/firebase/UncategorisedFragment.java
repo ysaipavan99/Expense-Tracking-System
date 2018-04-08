@@ -1,6 +1,7 @@
 package info.androidhive.firebase;
 
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,6 +15,9 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +25,7 @@ import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
@@ -32,16 +37,19 @@ import java.util.List;
  */
 public class UncategorisedFragment extends Fragment {
 
-    private String tagId;
+    private String tagId, catChangeTo ;
     private Firebase mRootRef;
-    private Firebase RefUid,RefTran;
-    int pos;
+    private Firebase RefUid,RefTran,RefCat, RefActualTran, RefCatSum;
+    int pos, intSum;
     private TextView textView;
-
+    private ArrayList<String> Catg=new ArrayList<>();
+    private ArrayAdapter<String> arrayAdapter;
+    private ListView changeCat;
     private Context context;
     private List<Transaction> TransactionListUF = new ArrayList<>();
     private RecyclerView recyclerViewUF;
     private TransactionAdapter mAdapterUF;
+
 
     public static Fragment getInstance(int position) {
         Bundle bundle = new Bundle();
@@ -68,6 +76,7 @@ public class UncategorisedFragment extends Fragment {
 
         //Toast.makeText(view.getContext(),"position: "+position,Toast.LENGTH_SHORT).show();
 
+        arrayAdapter=new ArrayAdapter<String>(view.getContext(),android.R.layout.simple_list_item_1,Catg);
 
         mRootRef=new Firebase("https://expense-2a69a.firebaseio.com/");
 
@@ -76,7 +85,38 @@ public class UncategorisedFragment extends Fragment {
         String Uid=auth.getUid();
         RefUid= mRootRef.child(Uid);
         RefTran = RefUid.child("UnCatTran");
+        RefCat=RefUid.child("Categories");
+        RefCatSum=RefUid.child("CatSum");
+        RefActualTran = RefUid.child("Transactions");
 
+        RefCat.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                String value= dataSnapshot.getKey().trim();
+                Catg.add(value);
+                arrayAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
 
 
         recyclerViewUF = (RecyclerView) view.findViewById(R.id.rv_uncat);
@@ -166,7 +206,74 @@ public class UncategorisedFragment extends Fragment {
             case 22:{
                 int show = item.getGroupId();
                 tagId=TransactionListUF.get(show).getTid();
-                Toast.makeText(getActivity(),tagId+"-"+"Change it",Toast.LENGTH_SHORT).show();
+                final Transaction updateTransac = new Transaction(TransactionListUF.get(show)); //Transaction to be modified
+
+                //Toast.makeText(getActivity(),tagId+"-"+"Change it",Toast.LENGTH_SHORT).show();
+
+                final Dialog dialog = new Dialog(getContext());
+                dialog.setContentView(R.layout.custom_dialog);
+                dialog.setTitle("Title...");
+
+                changeCat= (ListView) dialog.findViewById(R.id.CatgList);
+                changeCat.setAdapter(arrayAdapter);
+                dialog.show();
+                changeCat.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        catChangeTo = adapterView.getItemAtPosition(i).toString().trim();
+                        Toast.makeText(getActivity(),catChangeTo,Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+
+                        //Deleting from everywhere
+                        RefTran.child(tagId).removeValue();
+
+                        //Adding to the new category
+                        String tempDate = updateTransac.getT_date();
+                        String[] dateSet = tempDate.split(" - ");
+                        RefUid.child("DateRange").child(dateSet[1]+"-"+dateSet[2]).child("Transactions").child(tagId).child("Amount").setValue(updateTransac.getT_amt());
+                        RefUid.child("DateRange").child(dateSet[1]+"-"+dateSet[2]).child("Transactions").child(tagId).child("Category").setValue(catChangeTo);
+                        RefUid.child("DateRange").child(dateSet[1]+"-"+dateSet[2]).child("Transactions").child(tagId).child("Day").setValue(dateSet[0]);
+                        RefUid.child("DateRange").child(dateSet[1]+"-"+dateSet[2]).child("Transactions").child(tagId).child("Month").setValue(dateSet[1]);
+                        RefUid.child("DateRange").child(dateSet[1]+"-"+dateSet[2]).child("Transactions").child(tagId).child("Shop Name").setValue(updateTransac.getT_shopname());
+                        RefUid.child("DateRange").child(dateSet[1]+"-"+dateSet[2]).child("Transactions").child(tagId).child("Year").setValue(dateSet[2]);
+                        RefUid.child("DateRange").child(dateSet[1]+"-"+dateSet[2]).child("Transactions").child(tagId).child("ZMessage").setValue(updateTransac.getT_msg());
+
+                        //Adding to CatTran
+                        RefUid.child("DateRange").child(dateSet[1]+"-"+dateSet[2]).child("CatTran").child(catChangeTo).child(tagId).child("Amount").setValue(updateTransac.getT_amt());
+                        RefUid.child("DateRange").child(dateSet[1]+"-"+dateSet[2]).child("CatTran").child(catChangeTo).child(tagId).child("Category").setValue(catChangeTo);
+                        RefUid.child("DateRange").child(dateSet[1]+"-"+dateSet[2]).child("CatTran").child(catChangeTo).child(tagId).child("Day").setValue(dateSet[0]);
+                        RefUid.child("DateRange").child(dateSet[1]+"-"+dateSet[2]).child("CatTran").child(catChangeTo).child(tagId).child("Month").setValue(dateSet[1]);
+                        RefUid.child("DateRange").child(dateSet[1]+"-"+dateSet[2]).child("CatTran").child(catChangeTo).child(tagId).child("Shop Name").setValue(updateTransac.getT_shopname());
+                        RefUid.child("DateRange").child(dateSet[1]+"-"+dateSet[2]).child("CatTran").child(catChangeTo).child(tagId).child("Year").setValue(dateSet[2]);
+                        RefUid.child("DateRange").child(dateSet[1]+"-"+dateSet[2]).child("CatTran").child(catChangeTo).child(tagId).child("ZMessage").setValue(updateTransac.getT_msg());
+
+                        //Changing CatSum
+                        RefUid.child("DateRange").child(dateSet[1]+"-"+dateSet[2]).child("CatSum").child(catChangeTo).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                String sumCat = dataSnapshot.getValue().toString().trim();
+                                intSum = Integer.parseInt(sumCat);
+                                Integer newDelAmt = Integer.parseInt(updateTransac.getT_amt());
+                                intSum = intSum + newDelAmt;
+                                if(intSum==0)
+                                    dataSnapshot.getRef().removeValue();
+                                else
+                                    dataSnapshot.getRef().setValue(String.valueOf(intSum));
+                            }
+
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+
+                            }
+                        });
+
+
+                    }
+                });
+
+
+
+
 
             }break;
         }
@@ -176,7 +283,7 @@ public class UncategorisedFragment extends Fragment {
 
     private void prepareTransactionData() {
         RefTran.addChildEventListener(new ChildEventListener() {
-            String amount,cat,shname,shDay,shMonth,shYear;
+            String amount,cat,shname,shDay,shMonth,shYear,shMsg;
 
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -207,13 +314,18 @@ public class UncategorisedFragment extends Fragment {
                         case 5:
                             shYear=S.getValue().toString().trim();
                             break;
+                        case 6:
+                            shMsg=S.getValue().toString().trim();
+                            break;
+
+
                     }
                     //Transaction transaction=S.getValue(Transaction.class);
                     //transList.add(transaction);
                     i++;
                 }
                 String shdate= shDay+" - "+shMonth+" - "+shYear;
-                Transaction transaction=new Transaction(tid,amount,cat,shname,shdate);
+                Transaction transaction=new Transaction(tid,amount,cat,shname,shdate,shMsg);
                 //Toast.makeText(getApplicationContext(),transaction.getT_amt(),Toast.LENGTH_SHORT).show();
                 TransactionListUF.add(transaction);
                 mAdapterUF.notifyDataSetChanged();

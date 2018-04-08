@@ -12,7 +12,6 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.UUID;
 
 public class SMSReceiver extends BroadcastReceiver {
@@ -20,20 +19,26 @@ public class SMSReceiver extends BroadcastReceiver {
     String smsMessagestr, shopName="";
     int flag, preflag, reCheck;
     private Firebase mRootRef;
-    private Firebase RefUid,RefTran,UnCatTran;
+    private Firebase RefUid,UnCatTran,RefDUncatTran;
     private String Tid ;
     Double amt;
 
     @Override
     public void onReceive(Context context, Intent intent) {
 
+        Calendar c = Calendar.getInstance();
+        int d = c.get(Calendar.DAY_OF_MONTH);
+        int mm = c.get(Calendar.MONTH)+1;
+        int y = c.get(Calendar.YEAR);
+
         mRootRef=new Firebase("https://expense-2a69a.firebaseio.com/");
         mRootRef.keepSynced(true);
         com.google.firebase.auth.FirebaseAuth auth = FirebaseAuth.getInstance();
         String Uid=auth.getUid();
         RefUid= mRootRef.child(Uid);
-        RefTran = RefUid.child("Transactions");
         UnCatTran = RefUid.child("UnCatTran");
+        RefDUncatTran = RefUid.child(String.valueOf(mm)+"-"+ String.valueOf(y)).child("UnCatTran");
+
 
 
         Bundle intentExtras = intent.getExtras();
@@ -119,6 +124,7 @@ public class SMSReceiver extends BroadcastReceiver {
                 UnCatTran.child(Tid).child("Day").setValue(String.valueOf(day));
                 UnCatTran.child(Tid).child("Month").setValue(String.valueOf(month));
                 UnCatTran.child(Tid).child("Year").setValue(String.valueOf(year));
+
                 Toast.makeText(context,smsMessagestr,Toast.LENGTH_LONG).show();
 
             }

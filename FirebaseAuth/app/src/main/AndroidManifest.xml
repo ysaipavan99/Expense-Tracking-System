@@ -96,7 +96,8 @@
         <activity android:name=".PrefSettingsActivity" />
         <activity android:name=".PercentExpense" />
         <activity android:name=".CatExpPer" />
-        <activity android:name=".SMSTransShow"></activity>
+        <activity android:name=".SMSTransShow" />
+        <activity android:name=".SMScat"></activity>
     </application>
 
 </manifest>

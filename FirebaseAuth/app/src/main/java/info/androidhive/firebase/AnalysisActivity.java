@@ -1,9 +1,6 @@
 package info.androidhive.firebase;
 
-import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -22,13 +19,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -77,11 +74,16 @@ public class AnalysisActivity extends AppCompatActivity
     TextView tvHeaderName, tvHeaderMail;
     StorageReference storageReference, filepath,storageRef;
     ImageView userImage;
-    String Uid;
+    String Uid, saveDate="";
 
 
     private DatePicker dp;
     private ArrayList<String> Catg=new ArrayList<>();
+
+    Spinner dateRangeSet;
+    private ArrayList<String>DateRangeSpin = new ArrayList<>();
+    private ArrayAdapter<String> arrayAdapterDate;
+
 
     List<String>catList = new ArrayList<>();
     List<Integer>amtList = new ArrayList<>();
@@ -90,12 +92,11 @@ public class AnalysisActivity extends AppCompatActivity
     int flagTime = -1;
     String SelCat;
     FirebaseAuth auth;
-    Button press;
+    Button press, setdate;
     ViewPager viewPage;
     LinearLayout sliderDots;
     int dotCount;
     private ImageView[] dots;
-    Button pressButton;
 
     ArrayAdapter<CatTransSum> getSumCat;
 
@@ -112,6 +113,9 @@ public class AnalysisActivity extends AppCompatActivity
         setContentView(R.layout.activity_analysis);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
        // setSupportActionBar(toolbar);
+
+
+        arrayAdapterDate=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,DateRangeSpin);
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -182,9 +186,6 @@ public class AnalysisActivity extends AppCompatActivity
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar_layout);
         collapsingToolbarLayout.setTitle("Analysis");
 
-        pressButton = (Button)findViewById(R.id.pressme);
-
-
 
         recyclerView = (RecyclerView) findViewById(R.id.rv_catanalysis);
 
@@ -201,35 +202,13 @@ public class AnalysisActivity extends AppCompatActivity
         auth = FirebaseAuth.getInstance();
 
 
-        RefCat=RefUid.child("CatTran");
-
-        RefTran = RefUid.child("Transactions");
-        RefCatSum=RefUid.child("CatSum");
-
-
-
-
-        press=(Button) findViewById(R.id.pressme);
-        press.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               // Intent i=new Intent(AnalysisActivity.this,GraphActivity.class);
-               // startActivity(i);
-            }
-        });
-
-        RefCatSum.addChildEventListener(new ChildEventListener() {
+        dateRangeSet = (Spinner)findViewById(R.id.spinDate);
+        dateRangeSet.setAdapter(arrayAdapterDate);
+        RefUid.child("DateRange").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                String cat=dataSnapshot.getKey();
-                String amnt= dataSnapshot.getValue().toString().trim();
-                catList.add(cat);
-                amtList.add(Integer.parseInt(amnt));
-                /*
-                amount[amtcatIndex] = Integer.parseInt(amnt);
-                categories[amtcatIndex] = cat;
-                amtcatIndex++;*/
-                //Toast.makeText(getApplicationContext(),cat+","+amnt,Toast.LENGTH_SHORT).show();
+                DateRangeSpin.add(dataSnapshot.getKey().toString().trim());
+                arrayAdapterDate.notifyDataSetChanged();
             }
 
             @Override
@@ -253,10 +232,76 @@ public class AnalysisActivity extends AppCompatActivity
             }
         });
 
+        dateRangeSet.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                saveDate = adapterView.getItemAtPosition(i).toString().trim();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+
+        press=(Button) findViewById(R.id.pressme);
+        setdate = (Button)findViewById(R.id.setDate);
+
+        setdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                amtList.clear();
+                catList.clear();
+
+                RefTran = RefUid.child("DateRange").child(saveDate).child("Transactions");
+                RefCatSum=RefUid.child("DateRange").child(saveDate).child("CatSum");
 
 
 
-        pressButton.setOnClickListener(this);
+                RefCatSum.addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        String cat=dataSnapshot.getKey();
+                        String amnt= dataSnapshot.getValue().toString().trim();
+                        catList.add(cat);
+                        amtList.add(Integer.parseInt(amnt));
+                /*
+                amount[amtcatIndex] = Integer.parseInt(amnt);
+                categories[amtcatIndex] = cat;
+                amtcatIndex++;*/
+                        //Toast.makeText(getApplicationContext(),cat+","+amnt,Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+
+                    }
+                });
+
+
+
+            }
+        });
+
+
+
+        press.setOnClickListener(this);
 
         //Month and Year picker
         int mYear,mMonth,mDay;
@@ -264,19 +309,8 @@ public class AnalysisActivity extends AppCompatActivity
         mYear = c.get(Calendar.YEAR);
         mMonth = c.get(Calendar.MONTH);
         mDay = c.get(Calendar.DAY_OF_MONTH);
-        DatePickerDialog datePickerDialog = new DatePickerDialog(AnalysisActivity.this, AlertDialog.THEME_HOLO_DARK,
-                new DatePickerDialog.OnDateSetListener() {
 
-                    @Override
-                    public void onDateSet(DatePicker view, int year,
-                                          int monthOfYear, int dayOfMonth) {
 
-                        Toast.makeText(getApplicationContext(),dayOfMonth + "-" + (monthOfYear + 1) + "-" + year,Toast.LENGTH_LONG).show();
-
-                    }
-                }, mYear, mMonth, mDay);
-        ((ViewGroup) datePickerDialog.getDatePicker()).findViewById(Resources.getSystem().getIdentifier("day", "id", "android")).setVisibility(View.GONE);
-        datePickerDialog.show();
 
     }
 
@@ -314,10 +348,10 @@ public class AnalysisActivity extends AppCompatActivity
 
                 transList.clear();
                 mAdapter.notifyDataSetChanged();
-                OneRefCat=RefCat.child(SelCat);
+                OneRefCat=RefUid.child("DateRange").child(saveDate).child("CatTran").child(SelCat);
 
                 OneRefCat.addChildEventListener(new ChildEventListener() {
-                String amount,cat,shname,shDay,shMonth,shYear;
+                String amount, cat, shname, shDay, shMonth, shYear, shMsg;
 
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -348,13 +382,16 @@ public class AnalysisActivity extends AppCompatActivity
                             case 5:
                                 shYear=S.getValue().toString().trim();
                                 break;
+                            case 6:
+                                shMsg=S.getValue().toString().trim();
+                                break;
                         }
                         //Transaction transaction=S.getValue(Transaction.class);
                         //transList.add(transaction);
                         i++;
                     }
                     String shdate= shDay+" - "+shMonth+" - "+shYear;
-                    Transaction transaction=new Transaction(tid,amount,cat,shname,shdate);
+                    Transaction transaction=new Transaction(tid,amount,cat,shname,shdate,shMsg);
                     //Toast.makeText(getApplicationContext(),transaction.getT_amt(),Toast.LENGTH_SHORT).show();
                     transList.add(transaction);
                     mAdapter.notifyDataSetChanged();
@@ -505,9 +542,15 @@ public class AnalysisActivity extends AppCompatActivity
     @Override
     public void onClick(View v) {
 
+        if(saveDate==""){
+            Toast.makeText(getApplicationContext(),"Set the date first", Toast.LENGTH_SHORT).show();
+        }
+
+        else{
+
         amount = amtList.toArray(new Integer[amtList.size()]);
         categories = catList.toArray(new String[catList.size()]);
-        setUpPieChart();
+        setUpPieChart();}
 
     }
 }
