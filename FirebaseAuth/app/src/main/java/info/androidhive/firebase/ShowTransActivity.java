@@ -1,17 +1,15 @@
 package info.androidhive.firebase;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
@@ -58,7 +56,7 @@ public class ShowTransActivity extends AppCompatActivity {
 
 
         RefTran.addChildEventListener(new ChildEventListener() {
-            String amount,cat,shname,shDay,shMonth,shYear;
+            String amount,cat,shname,shDay,shMonth,shYear,shMsg;
 
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -89,13 +87,16 @@ public class ShowTransActivity extends AppCompatActivity {
                         case 5:
                             shYear=S.getValue().toString().trim();
                             break;
+                        case 6:
+                            shMsg=S.getValue().toString().trim();
+                            break;
                     }
                     //Transaction transaction=S.getValue(Transaction.class);
                     //transList.add(transaction);
                     i++;
                 }
                 String shdate= shDay+" - "+shMonth+" - "+shYear;
-                Transaction transaction=new Transaction(tid,amount,cat,shname,shdate);
+                Transaction transaction=new Transaction(tid,amount,cat,shname,shdate,shMsg);
                 amount="";
                 cat="";
                 shname="";

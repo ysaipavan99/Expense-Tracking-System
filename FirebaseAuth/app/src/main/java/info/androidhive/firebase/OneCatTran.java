@@ -55,7 +55,7 @@ public class OneCatTran extends AppCompatActivity {
 
 
         OneRefCat.addChildEventListener(new ChildEventListener() {
-            String amount,cat,shname,shDay,shMonth,shYear;
+            String amount,cat,shname,shDay,shMonth,shYear,shMsg;
 
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -86,13 +86,16 @@ public class OneCatTran extends AppCompatActivity {
                         case 5:
                             shYear=S.getValue().toString().trim();
                             break;
+                        case 6:
+                            shMsg=S.getValue().toString().trim();
+                            break;
                     }
                     //Transaction transaction=S.getValue(Transaction.class);
                     //transList.add(transaction);
                     i++;
                 }
                 String shdate= shDay+" - "+shMonth+" - "+shYear;
-                Transaction transaction=new Transaction(tid,amount,cat,shname,shdate);
+                Transaction transaction=new Transaction(tid,amount,cat,shname,shdate,shMsg);
                 //Toast.makeText(getApplicationContext(),transaction.getT_amt(),Toast.LENGTH_SHORT).show();
                 transList.add(transaction);
                 mAdapter.notifyDataSetChanged();

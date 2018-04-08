@@ -1,6 +1,7 @@
 package info.androidhive.firebase;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,6 +13,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,11 +35,14 @@ import java.util.List;
  */
 public class TabFragment extends Fragment {
     private Firebase mRootRef;
-    private Firebase RefUid,RefTran,RefCatTran,RefCatSum;
+    private Firebase RefUid,RefTran,RefCatTran,RefCatSum, RefCat;
     int pos, intSum;
-    private String tagId, delCategory, delAmt;
+    private String tagId, delCategory, delAmt, catChangeTo;
     private TextView textView;
 
+    private ArrayList<String> CatgTF=new ArrayList<>();
+    private ArrayAdapter<String> arrayAdapterTF;
+    private ListView changeCatTF;
     private List<Transaction> TransactionList = new ArrayList<>();
     private RecyclerView recyclerView;
     private TransAdapter mAdapter1;
@@ -69,20 +75,57 @@ public class TabFragment extends Fragment {
         //Toast.makeText(view.getContext(),"position: "+position,Toast.LENGTH_SHORT).show();
 
 
+
+
+        Calendar calendar = Calendar.getInstance();
+        int currentDay = (calendar.get(Calendar.DAY_OF_MONTH));
+        int currentMonth = (calendar.get(Calendar.MONTH)+1);
+        int currentYear = (calendar.get(Calendar.YEAR));
         mRootRef=new Firebase("https://expense-2a69a.firebaseio.com/");
 
         mRootRef.keepSynced(true);
         com.google.firebase.auth.FirebaseAuth auth = FirebaseAuth.getInstance();
         String Uid=auth.getUid();
         RefUid= mRootRef.child(Uid);
-        RefTran = RefUid.child("Transactions");
-        RefCatTran = RefUid.child("CatTran");
-        RefCatSum = RefUid.child("CatSum");
+        RefTran = RefUid.child("DateRange").child(currentMonth+"-"+currentYear).child("Transactions");
+        RefCatTran = RefUid.child("DateRange").child(currentMonth+"-"+currentYear).child("CatTran");
+        RefCatSum = RefUid.child("DateRange").child(currentMonth+"-"+currentYear).child("CatSum");
+        RefCat = RefUid.child("Categories");
 
-        Calendar calendar = Calendar.getInstance();
-        int currentDay = (calendar.get(Calendar.DAY_OF_MONTH));
-        int currentMonth = (calendar.get(Calendar.MONTH)+1);
-        int currentYear = (calendar.get(Calendar.YEAR));
+        arrayAdapterTF=new ArrayAdapter<String>(view.getContext(),android.R.layout.simple_list_item_1,CatgTF);
+
+
+        RefCat.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                String value= dataSnapshot.getKey().trim();
+                CatgTF.add(value);
+                arrayAdapterTF.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+
+
 
         Toast.makeText(getContext(),currentMonth+"/"+currentYear,Toast.LENGTH_SHORT).show();
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
@@ -101,7 +144,10 @@ public class TabFragment extends Fragment {
         mAdapter1.setOnItemClickListener(new TransAdapter.ClickListener() {
             @Override
             public void OnItemClick(int position, View v) {
-                Toast.makeText(getActivity(),TransactionList.get(position).getTid(),Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getActivity(),TransactionList.get(position).getTid(),Toast.LENGTH_SHORT).show();
+                Intent i = new Intent(getActivity(),SMScat.class);
+                i.putExtra("indexPos",TransactionList.get(position).getTid());
+                startActivity(i);
 
             }
 
@@ -148,26 +194,102 @@ public class TabFragment extends Fragment {
                     }
                 });
 
-
-
-
-
                 TransactionList.clear();
                 prepareTransactionData();
 
 
-
-
-
-
             }break;
 
-            case 12:{
+           /* case 12:{
                 int show = item.getGroupId();
                 tagId=TransactionList.get(show).getTid();
                 Toast.makeText(getActivity(),tagId+"-"+"Change it",Toast.LENGTH_SHORT).show();
 
-            }break;
+                final Transaction updateTransac = new Transaction(TransactionList.get(show)); //Transaction to be modified
+
+                //Toast.makeText(getActivity(),tagId+"-"+"Change it",Toast.LENGTH_SHORT).show();
+
+                final Dialog dialog = new Dialog(getContext());
+                dialog.setContentView(R.layout.tab_dialog);
+                dialog.setTitle("Title...");
+
+                changeCatTF = (ListView) dialog.findViewById(R.id.CatgListTF);
+                changeCatTF.setAdapter(arrayAdapterTF);
+                dialog.show();
+                changeCatTF.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        catChangeTo = adapterView.getItemAtPosition(i).toString().trim();
+                        Toast.makeText(getActivity(),catChangeTo,Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+
+                        //Deleting from everywhere
+                        RefTran.child(tagId).removeValue();
+                        RefCatTran.child(updateTransac.getT_cat()).child(tagId).removeValue();
+
+                        //Adding to the new category
+                        String tempDate = updateTransac.getT_date();
+                        String[] dateSet = tempDate.split(" - ");
+                        RefTran.child(tagId).child("Amount").setValue(updateTransac.getT_amt());
+                        RefTran.child(tagId).child("Category").setValue(catChangeTo);
+                        RefTran.child(tagId).child("Day").setValue(dateSet[0]);
+                        RefTran.child(tagId).child("Month").setValue(dateSet[1]);
+                        RefTran.child(tagId).child("Shop Name").setValue(updateTransac.getT_shopname());
+                        RefTran.child(tagId).child("Year").setValue(dateSet[2]);
+                        RefTran.child(tagId).child("ZMessage").setValue(updateTransac.getT_msg());
+                        RefCatTran.child(catChangeTo).child(tagId).child("Amount").setValue(updateTransac.getT_amt());
+                        RefCatTran.child(catChangeTo).child(tagId).child("Category").setValue(catChangeTo);
+                        RefCatTran.child(catChangeTo).child(tagId).child("Day").setValue(dateSet[0]);
+                        RefCatTran.child(catChangeTo).child(tagId).child("Month").setValue(dateSet[1]);
+                        RefCatTran.child(catChangeTo).child(tagId).child("Shop Name").setValue(updateTransac.getT_shopname());
+                        RefCatTran.child(catChangeTo).child(tagId).child("Year").setValue(dateSet[2]);
+                        RefCatTran.child(catChangeTo).child(tagId).child("ZMessage").setValue(updateTransac.getT_msg());
+
+
+                        RefCatSum.child(updateTransac.getT_cat()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                String sumCat = dataSnapshot.getValue().toString().trim();
+                                intSum = Integer.parseInt(sumCat);
+                                Integer newDelAmt = Integer.parseInt(updateTransac.getT_amt());
+                                intSum = intSum - newDelAmt;
+                                if(intSum==0)
+                                    dataSnapshot.getRef().removeValue();
+                                else
+                                    dataSnapshot.getRef().setValue(String.valueOf(intSum));
+                            }
+
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+
+                            }
+                        });
+
+                        RefCatSum.child(catChangeTo).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                String sumCat = dataSnapshot.getValue().toString().trim();
+                                intSum = Integer.parseInt(sumCat);
+                                Integer newDelAmt = Integer.parseInt(updateTransac.getT_amt());
+                                intSum = intSum + newDelAmt;
+                                if(intSum==0)
+                                    dataSnapshot.getRef().removeValue();
+                                else
+                                    dataSnapshot.getRef().setValue(String.valueOf(intSum));
+                            }
+
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+
+                            }
+                        });
+
+                    }
+                });
+
+
+
+            }break;*/
         }
         return super.onContextItemSelected(item);
     }
@@ -175,7 +297,7 @@ public class TabFragment extends Fragment {
     private void prepareTransactionData() {
 
         RefTran.addChildEventListener(new ChildEventListener() {
-            String amount,cat,shname,shDay,shMonth,shYear;
+            String amount,cat,shname,shDay,shMonth,shYear,shMsg;
 
 
             @Override
@@ -208,13 +330,16 @@ public class TabFragment extends Fragment {
                         case 5:
                             shYear=S.getValue().toString().trim();
                             break;
+                        case 6:
+                            shMsg=S.getValue().toString().trim();
+                            break;
                     }
                     //Transaction transaction=S.getValue(Transaction.class);
                     //transList.add(transaction);
                     i++;
                 }
                 String shdate= shDay+" - "+shMonth+" - "+shYear;
-                Transaction transaction=new Transaction(tid,amount,cat,shname,shdate);
+                Transaction transaction=new Transaction(tid,amount,cat,shname,shdate,shMsg);
                 //Toast.makeText(getApplicationContext(),transaction.getT_amt(),Toast.LENGTH_SHORT).show();
                 TransactionList.add(transaction);
                 mAdapter1.notifyDataSetChanged();
