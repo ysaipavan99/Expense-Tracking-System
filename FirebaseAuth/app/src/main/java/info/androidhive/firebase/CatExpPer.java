@@ -1,16 +1,17 @@
 package info.androidhive.firebase;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.Calendar;
 
 public class CatExpPer extends AppCompatActivity {
     private Firebase mRootRef;
@@ -25,6 +26,11 @@ public class CatExpPer extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cat_exp_per);
 
+        Calendar c = Calendar.getInstance();
+        int day = c.get(Calendar.DAY_OF_MONTH);
+        int month = c.get(Calendar.MONTH)+1;
+        int year = c.get(Calendar.YEAR);
+
         catn=findViewById(R.id.catn);
         catgbudg=findViewById(R.id.catgbudg);
         catsum=findViewById(R.id.catsum);
@@ -36,12 +42,12 @@ public class CatExpPer extends AppCompatActivity {
         com.google.firebase.auth.FirebaseAuth auth = FirebaseAuth.getInstance();
         String Uid=auth.getUid();
         RefUid= mRootRef.child(Uid);
-        RefCat=RefUid.child("CatTran");
+        RefCat=RefUid.child("DateRange").child(month+"-"+year).child("CatTran");
         Intent intent = getIntent();
         String SelCat = intent.getStringExtra("name");
         catn.setText(SelCat);
 
-        RefUid.child("CatSum").child(SelCat).addValueEventListener(new ValueEventListener() {
+        RefUid.child("DateRange").child(month+"-"+year).child("CatSum").child(SelCat).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 catSum = dataSnapshot.getValue().toString().trim();
