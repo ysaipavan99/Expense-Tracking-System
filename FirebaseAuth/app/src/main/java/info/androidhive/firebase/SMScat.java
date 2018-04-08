@@ -11,6 +11,8 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
+import java.util.Calendar;
+
 public class SMScat extends AppCompatActivity {
     TextView smstid,smstamnt,smsshpname,smscat,smsdate,sms;
     private Firebase mRootRef;
@@ -30,6 +32,13 @@ public class SMScat extends AppCompatActivity {
         smscat=findViewById(R.id.smscat);
         smsdate=findViewById(R.id.smsdate);
         sms=findViewById(R.id.sms);
+
+        Calendar c = Calendar.getInstance();
+        int day = c.get(Calendar.DAY_OF_MONTH);
+        int month = c.get(Calendar.MONTH)+1;
+        int year = c.get(Calendar.YEAR);
+
+
         mRootRef=new Firebase("https://expense-2a69a.firebaseio.com/");
 
         mRootRef.keepSynced(true);
@@ -37,7 +46,7 @@ public class SMScat extends AppCompatActivity {
         String Uid=auth.getUid();
         RefUid= mRootRef.child(Uid);
 
-        RefUid.child("Transactions").child(tid).child("Amount").addValueEventListener(new ValueEventListener() {
+        RefUid.child("DateRange").child(month+"-"+year).child("Transactions").child(tid).child("Amount").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 smstamnt.setText(dataSnapshot.getValue().toString().trim());
@@ -50,7 +59,7 @@ public class SMScat extends AppCompatActivity {
         });
 
 
-        RefUid.child("Transactions").child(tid).child("Category").addValueEventListener(new ValueEventListener() {
+        RefUid.child("DateRange").child(month+"-"+year).child("Transactions").child(tid).child("Category").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 smscat.setText(dataSnapshot.getValue().toString().trim());
@@ -63,7 +72,7 @@ public class SMScat extends AppCompatActivity {
         });
 
 
-        RefUid.child("Transactions").child(tid).child("Shop Name").addValueEventListener(new ValueEventListener() {
+        RefUid.child("DateRange").child(month+"-"+year).child("Transactions").child(tid).child("Shop Name").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 smsshpname.setText(dataSnapshot.getValue().toString().trim());
@@ -76,7 +85,7 @@ public class SMScat extends AppCompatActivity {
         });
 
 
-        RefUid.child("Transactions").child(tid).child("ZMessage").addValueEventListener(new ValueEventListener() {
+        RefUid.child("DateRange").child(month+"-"+year).child("Transactions").child(tid).child("ZMessage").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 sms.setText(dataSnapshot.getValue().toString().trim());
@@ -89,7 +98,7 @@ public class SMScat extends AppCompatActivity {
         });
 
 
-        RefUid.child("Transactions").child(tid).child("Day").addValueEventListener(new ValueEventListener() {
+        RefUid.child("DateRange").child(month+"-"+year).child("Transactions").child(tid).child("Day").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 d=dataSnapshot.getValue().toString().trim();
@@ -102,7 +111,7 @@ public class SMScat extends AppCompatActivity {
         });
 
 
-        RefUid.child("Transactions").child(tid).child("Month").addValueEventListener(new ValueEventListener() {
+        RefUid.child("DateRange").child(month+"-"+year).child("Transactions").child(tid).child("Month").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 m=dataSnapshot.getValue().toString().trim();
@@ -114,7 +123,7 @@ public class SMScat extends AppCompatActivity {
             }
         });
 
-        RefUid.child("Transactions").child(tid).child("Year").addValueEventListener(new ValueEventListener() {
+        RefUid.child("DateRange").child(month+"-"+year).child("Transactions").child(tid).child("Year").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 y=dataSnapshot.getValue().toString().trim();

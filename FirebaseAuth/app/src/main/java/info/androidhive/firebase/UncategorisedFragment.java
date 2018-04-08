@@ -39,7 +39,7 @@ public class UncategorisedFragment extends Fragment {
 
     private String tagId, catChangeTo ;
     private Firebase mRootRef;
-    private Firebase RefUid,RefTran,RefCat, RefActualTran, RefCatSum;
+    private Firebase RefUid,RefTran,RefCat;
     int pos, intSum;
     private TextView textView;
     private ArrayList<String> Catg=new ArrayList<>();
@@ -76,7 +76,6 @@ public class UncategorisedFragment extends Fragment {
 
         //Toast.makeText(view.getContext(),"position: "+position,Toast.LENGTH_SHORT).show();
 
-        arrayAdapter=new ArrayAdapter<String>(view.getContext(),android.R.layout.simple_list_item_1,Catg);
 
         mRootRef=new Firebase("https://expense-2a69a.firebaseio.com/");
 
@@ -86,8 +85,8 @@ public class UncategorisedFragment extends Fragment {
         RefUid= mRootRef.child(Uid);
         RefTran = RefUid.child("UnCatTran");
         RefCat=RefUid.child("Categories");
-        RefCatSum=RefUid.child("CatSum");
-        RefActualTran = RefUid.child("Transactions");
+
+        arrayAdapter = new ArrayAdapter<String>(view.getContext(),android.R.layout.simple_list_item_1,Catg);
 
         RefCat.addChildEventListener(new ChildEventListener() {
             @Override
@@ -265,15 +264,11 @@ public class UncategorisedFragment extends Fragment {
                             public void onCancelled(FirebaseError firebaseError) {
 
                             }
-                        });
 
+                        });
 
                     }
                 });
-
-
-
-
 
             }break;
         }
