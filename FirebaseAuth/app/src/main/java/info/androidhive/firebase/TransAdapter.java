@@ -96,8 +96,8 @@ public class TransAdapter extends RecyclerView.Adapter<TransAdapter.MyViewHolder
         @Override
         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
             menu.setHeaderTitle("Select an action");
-            menu.add(getAdapterPosition(),1,0,"Delete");
-            menu.add(getAdapterPosition(),2,0,"Change category");
+            menu.add(getAdapterPosition(),11,0,"Delete");
+            menu.add(getAdapterPosition(),21,0,"Change category");
 
         }
     }

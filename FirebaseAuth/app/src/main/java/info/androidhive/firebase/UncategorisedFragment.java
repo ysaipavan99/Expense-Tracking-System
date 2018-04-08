@@ -118,14 +118,14 @@ public class UncategorisedFragment extends Fragment {
 
         switch(item.getItemId())
         {
-            case 1:{
+            case 21:{
                 int show = item.getGroupId();
                 tagId=TransactionListUF.get(show).getTid();
                 Toast.makeText(getActivity(),tagId+"-"+"Delete it",Toast.LENGTH_SHORT).show();
 
             }break;
 
-            case 2:{
+            case 22:{
                 int show = item.getGroupId();
                 tagId=TransactionListUF.get(show).getTid();
                 Toast.makeText(getActivity(),tagId+"-"+"Change it",Toast.LENGTH_SHORT).show();

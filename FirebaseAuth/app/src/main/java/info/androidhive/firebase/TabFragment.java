@@ -22,6 +22,7 @@ import com.firebase.client.FirebaseError;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 
@@ -75,7 +76,12 @@ public class TabFragment extends Fragment {
         RefUid= mRootRef.child(Uid);
         RefTran = RefUid.child("Transactions");
 
+        Calendar calendar = Calendar.getInstance();
+        int currentDay = (calendar.get(Calendar.DAY_OF_MONTH));
+        int currentMonth = (calendar.get(Calendar.MONTH)+1);
+        int currentYear = (calendar.get(Calendar.YEAR));
 
+        Toast.makeText(getContext(),currentMonth+"/"+currentYear,Toast.LENGTH_SHORT).show();
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(view.getContext());
@@ -110,14 +116,14 @@ public class TabFragment extends Fragment {
 
         switch(item.getItemId())
         {
-            case 1:{
+            case 11:{
                 int show = item.getGroupId();
                 tagId=TransactionList.get(show).getTid();
                 Toast.makeText(getActivity(),tagId+"-"+"Delete it",Toast.LENGTH_SHORT).show();
 
             }break;
 
-            case 2:{
+            case 12:{
                 int show = item.getGroupId();
                 tagId=TransactionList.get(show).getTid();
                 Toast.makeText(getActivity(),tagId+"-"+"Change it",Toast.LENGTH_SHORT).show();
