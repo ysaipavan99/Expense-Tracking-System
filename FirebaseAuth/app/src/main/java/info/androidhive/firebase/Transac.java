@@ -1,10 +1,8 @@
 package info.androidhive.firebase;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.format.DateFormat;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -16,17 +14,15 @@ import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
-import com.firebase.client.FirebaseError;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.google.firebase.auth.FirebaseAuth;
 
 import org.apache.commons.collections4.map.MultiValueMap;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -63,6 +59,7 @@ public class Transac extends AppCompatActivity {
         RefUid = mRootRef.child(Uid);
         RefTran = RefUid.child("Transactions");
         RefCatSum = RefUid.child("CatSum");
+        RefCatSum.removeValue();
         RefName = RefUid.child("Name");
         RefEmail = RefUid.child("Email");
         RefPhnnum = RefUid.child("Phone Number");

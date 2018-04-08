@@ -4,21 +4,24 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.v4.view.ViewPager;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -26,7 +29,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
@@ -42,15 +45,20 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import org.apache.commons.collections4.map.MultiValueMap;
 
-import java.io.Serializable;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -64,6 +72,13 @@ public class AnalysisActivity extends AppCompatActivity
     private List<Transaction> transList = new ArrayList<>();
     private RecyclerView recyclerView;
     private TransactionAdapter mAdapter;
+
+    private Firebase RefName,RefEmail;
+    TextView tvHeaderName, tvHeaderMail;
+    StorageReference storageReference, filepath,storageRef;
+    ImageView userImage;
+    String Uid;
+
 
     private DatePicker dp;
     private ArrayList<String> Catg=new ArrayList<>();
@@ -105,8 +120,64 @@ public class AnalysisActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        //Changing contents of navigation header
+        mRootRef=new Firebase("https://expense-2a69a.firebaseio.com/");
+        mRootRef.keepSynced(true);
+        com.google.firebase.auth.FirebaseAuth auth = FirebaseAuth.getInstance();
+        Uid=auth.getUid();
+        RefUid= mRootRef.child(Uid);
+        RefName = RefUid.child("Name");
+        RefEmail=RefUid.child("Email");
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        View navHeaderView =  navigationView.getHeaderView(0);
+        tvHeaderName = (TextView)navHeaderView.findViewById(R.id.headerName);
+        tvHeaderMail = (TextView)navHeaderView.findViewById(R.id.headerEmail);
+        userImage = (ImageView)navHeaderView.findViewById(R.id.imageView);
+        storageReference = FirebaseStorage.getInstance().getReference();
+        storageRef=storageReference.child("Profile Image").child(Uid+".jpg");
+        try {
+            final File localFile = File.createTempFile("images", "jpg");
+            storageRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                    userImage.setImageBitmap(bitmap);
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                }
+            });
+        } catch (IOException e ) {}
+
+
         navigationView.setNavigationItemSelectedListener(this);
+
+
+        RefName.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                tvHeaderName.setText(dataSnapshot.getValue().toString().trim());
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+        RefEmail.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                tvHeaderMail.setText(dataSnapshot.getValue().toString().trim());
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
 
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar_layout);
         collapsingToolbarLayout.setTitle("Analysis");
@@ -129,12 +200,7 @@ public class AnalysisActivity extends AppCompatActivity
 
         auth = FirebaseAuth.getInstance();
 
-        mRootRef=new Firebase("https://expense-2a69a.firebaseio.com/");
 
-        mRootRef.keepSynced(true);
-        com.google.firebase.auth.FirebaseAuth auth = FirebaseAuth.getInstance();
-        String Uid=auth.getUid();
-        RefUid= mRootRef.child(Uid);
         RefCat=RefUid.child("CatTran");
 
         RefTran = RefUid.child("Transactions");

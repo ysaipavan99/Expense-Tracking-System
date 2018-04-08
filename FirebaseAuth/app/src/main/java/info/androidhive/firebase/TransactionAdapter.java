@@ -97,8 +97,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
 
             menu.setHeaderTitle("Select an action");
-            menu.add(getAdapterPosition(),1,0,"Delete");
-            menu.add(getAdapterPosition(),2,0,"Change category");
+            menu.add(getAdapterPosition(),21,0,"Delete");
+            menu.add(getAdapterPosition(),22,0,"Change category");
 
         }
     }
