@@ -33,7 +33,7 @@ public class Transac extends AppCompatActivity {
     private Firebase mRootRef;
     private Firebase RefUid;
     private Firebase RefName, RefEmail, RefPhnnum;
-    private Firebase RefCat, RefTran, RefCatSum, RefHealth, RefTravel, RefEdu, RefBills, RefHomeNeeds, RefOthers, RefUncat;
+    private Firebase RefCat, RefTran,RefTran1, RefCatSum,RefCatSum1, RefHealth, RefTravel, RefEdu, RefBills, RefHomeNeeds, RefOthers, RefUncat;
     private String Tid;
     private ArrayList<String> Catg = new ArrayList<>();
     private Button AddTran;
@@ -45,6 +45,7 @@ public class Transac extends AppCompatActivity {
     String day, month, year;
     int d, m, y;
     MultiValueMap<String, String> catgTrans = MultiValueMap.multiValueMap(new LinkedHashMap<String, Collection<String>>(), (Class<LinkedHashSet<String>>) (Class<?>) LinkedHashSet.class);
+    MultiValueMap<String, String> catgTrans1 = MultiValueMap.multiValueMap(new LinkedHashMap<String, Collection<String>>(), (Class<LinkedHashSet<String>>) (Class<?>) LinkedHashSet.class);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +59,7 @@ public class Transac extends AppCompatActivity {
         String Uid = auth.getUid();
         RefUid = mRootRef.child(Uid);
         RefTran = RefUid.child("Transactions");
+
         RefCatSum = RefUid.child("CatSum");
         RefCatSum.removeValue();
         RefName = RefUid.child("Name");
@@ -141,10 +143,10 @@ public class Transac extends AppCompatActivity {
                         RefTran.child(Tid).child("Category").setValue(SelCat);
                         RefTran.child(Tid).child("Shop Name").setValue(ShopName);
                         RefTran.child(Tid).child("ZMessage").setValue("Entered Manually...");
-
                         RefTran.child(Tid).child("Day").setValue(day);
                         RefTran.child(Tid).child("Month").setValue(month);
                         RefTran.child(Tid).child("Year").setValue(year);
+
                         RefUid.child("CatTran").child(SelCat).child(Tid);
                         RefUid.child("CatTran").child(SelCat).child(Tid).child("Amount").setValue(Amount);
                         RefUid.child("CatTran").child(SelCat).child(Tid).child("Category").setValue(SelCat);
@@ -153,6 +155,33 @@ public class Transac extends AppCompatActivity {
                         RefUid.child("CatTran").child(SelCat).child(Tid).child("Day").setValue(day);
                         RefUid.child("CatTran").child(SelCat).child(Tid).child("Month").setValue(month);
                         RefUid.child("CatTran").child(SelCat).child(Tid).child("Year").setValue(year);
+
+
+                        RefUid.child(String.valueOf(month+"-"+year)).child("Transactions").child(Tid).child("Amount").setValue(Amount);
+                        RefUid.child(String.valueOf(month+"-"+year)).child("Transactions").child(Tid).child("Category").setValue(SelCat);
+                        RefUid.child(String.valueOf(month+"-"+year)).child("Transactions").child(Tid).child("Shop Name").setValue(ShopName);
+                        RefUid.child(String.valueOf(month+"-"+year)).child("Transactions").child(Tid).child("ZMessage").setValue("Entered Manually...");
+                        RefUid.child(String.valueOf(month+"-"+year)).child("Transactions").child(Tid).child("Day").setValue(day);
+                        RefUid.child(String.valueOf(month+"-"+year)).child("Transactions").child(Tid).child("Month").setValue(month);
+                        RefUid.child(String.valueOf(month+"-"+year)).child("Transactions").child(Tid).child("Year").setValue(year);
+
+                        RefUid.child(String.valueOf(month+"-"+year)).child("CatTran").child(SelCat).child(Tid).child("Amount").setValue(Amount);
+                        RefUid.child(String.valueOf(month+"-"+year)).child("CatTran").child(SelCat).child(Tid).child("Category").setValue(SelCat);
+                        RefUid.child(String.valueOf(month+"-"+year)).child("CatTran").child(SelCat).child(Tid).child("Shop Name").setValue(ShopName);
+                        RefUid.child(String.valueOf(month+"-"+year)).child("CatTran").child(SelCat).child(Tid).child("ZMessage").setValue("Entered Manually...");
+                        RefUid.child(String.valueOf(month+"-"+year)).child("CatTran").child(SelCat).child(Tid).child("Day").setValue(day);
+                        RefUid.child(String.valueOf(month+"-"+year)).child("CatTran").child(SelCat).child(Tid).child("Month").setValue(month);
+                        RefUid.child(String.valueOf(month+"-"+year)).child("CatTran").child(SelCat).child(Tid).child("Year").setValue(year);
+
+
+
+                        RefTran1 = RefUid.child(String.valueOf(month+"-"+year)).child("Transactions");
+
+                        RefCatSum1= RefUid.child(String.valueOf(month+"-"+year)).child("CatSum");
+
+
+
+
 
                         Toast.makeText(getApplicationContext(),"Transaction added",Toast.LENGTH_SHORT).show();
                         Amnt.setText("");
@@ -217,6 +246,55 @@ public class Transac extends AppCompatActivity {
                 });
 
 
+
+
+                RefTran1.addChildEventListener(new com.firebase.client.ChildEventListener() {
+                    String amount, cat, shname, shDay, shMonth, shYear;
+
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        int i = 0;
+
+                        for (DataSnapshot S : dataSnapshot.getChildren()) {
+
+                            switch (i) {
+                                case 0:
+                                    amount = S.getValue().toString().trim();
+                                    break;
+                                case 1:
+                                    cat = S.getValue().toString().trim();
+                                    break;
+
+                            }
+
+                            i++;
+                        }
+                        catgTrans1.put(cat, amount);
+
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+
+                    }
+                });
+
+
             }
         });
         RefCat.addChildEventListener(new ChildEventListener() {
@@ -252,6 +330,8 @@ public class Transac extends AppCompatActivity {
 
     public void onBackPressed() {
         Iterator<String> mapIter = catgTrans.keySet().iterator();
+        Iterator<String> mapIter1 = catgTrans1.keySet().iterator();
+
 
         while (mapIter.hasNext()) {
             String key = mapIter.next();
@@ -261,9 +341,23 @@ public class Transac extends AppCompatActivity {
             SumTrans obj = new SumTrans();
             RefCatSum.child(key).setValue(obj.computeSum(val).toString());
 
+        }
 
+        while (mapIter1.hasNext()) {
+            String key = mapIter1.next();
+//                    Toast.makeText(getApplicationContext(), "Value: " + key + ":" + catgTrans.get(key), Toast.LENGTH_SHORT).show();
+
+            Collection<String> val = catgTrans1.getCollection(key);
+            SumTrans obj = new SumTrans();
+            RefCatSum1.child(key).setValue(obj.computeSum(val).toString());
             Intent i = new Intent(Transac.this, HomeActivity.class);
             startActivity(i);
         }
+
+
+
+
+
+
     }
 }
