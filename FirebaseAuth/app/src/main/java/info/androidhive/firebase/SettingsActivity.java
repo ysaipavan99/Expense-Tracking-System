@@ -70,7 +70,7 @@ public class SettingsActivity extends AppCompatActivity
 
         mRootRef=new Firebase("https://expense-2a69a.firebaseio.com/");
         mRootRef.keepSynced(true);
-        com.google.firebase.auth.FirebaseAuth auth = com.google.firebase.auth.FirebaseAuth.getInstance();
+        auth = com.google.firebase.auth.FirebaseAuth.getInstance();
         Uid=auth.getUid();
         RefUid= mRootRef.child(Uid);
         RefName = RefUid.child("Name");

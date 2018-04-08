@@ -136,10 +136,6 @@ public class HomeActivity extends AppCompatActivity
 
 
 
-        auth = FirebaseAuth.getInstance();
-
-
-
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         /*ViewPageAdapter adapter = new ViewPageAdapter(getSupportFragmentManager());
         viewPager.setAdapter(adapter);*/

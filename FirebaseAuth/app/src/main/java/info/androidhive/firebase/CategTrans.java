@@ -1,13 +1,12 @@
 package info.androidhive.firebase;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -16,6 +15,7 @@ import com.firebase.client.FirebaseError;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class CategTrans extends AppCompatActivity {
     private ListView catView;
@@ -33,13 +33,19 @@ public class CategTrans extends AppCompatActivity {
         final ArrayAdapter<String> arrayAdapter=new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,Catg);
         catView.setAdapter(arrayAdapter);
 
+
+        Calendar c = Calendar.getInstance();
+        int d = c.get(Calendar.DAY_OF_MONTH);
+        int m = c.get(Calendar.MONTH)+1;
+        int y = c.get(Calendar.YEAR);
+
         mRootRef=new Firebase("https://expense-2a69a.firebaseio.com/");
 
         mRootRef.keepSynced(true);
         com.google.firebase.auth.FirebaseAuth auth = FirebaseAuth.getInstance();
         String Uid=auth.getUid();
         RefUid= mRootRef.child(Uid);
-        RefCat=RefUid.child("CatTran");
+        RefCat=RefUid.child("DateRange").child(m+"-"+y).child("CatTran");
 
 
         RefCat.addChildEventListener(new ChildEventListener() {

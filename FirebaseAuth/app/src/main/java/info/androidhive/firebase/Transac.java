@@ -32,8 +32,7 @@ public class Transac extends AppCompatActivity {
 
     private Firebase mRootRef;
     private Firebase RefUid;
-    private Firebase RefName, RefEmail, RefPhnnum;
-    private Firebase RefCat, RefTran,RefTran1, RefCatSum,RefCatSum1, RefHealth, RefTravel, RefEdu, RefBills, RefHomeNeeds, RefOthers, RefUncat;
+    private Firebase RefTran1, RefCatSum1, RefCat;
     private String Tid;
     private ArrayList<String> Catg = new ArrayList<>();
     private Button AddTran;
@@ -44,7 +43,6 @@ public class Transac extends AppCompatActivity {
     private DatePicker dateTransac;
     String day, month, year;
     int d, m, y;
-    MultiValueMap<String, String> catgTrans = MultiValueMap.multiValueMap(new LinkedHashMap<String, Collection<String>>(), (Class<LinkedHashSet<String>>) (Class<?>) LinkedHashSet.class);
     MultiValueMap<String, String> catgTrans1 = MultiValueMap.multiValueMap(new LinkedHashMap<String, Collection<String>>(), (Class<LinkedHashSet<String>>) (Class<?>) LinkedHashSet.class);
 
     @Override
@@ -58,14 +56,8 @@ public class Transac extends AppCompatActivity {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         String Uid = auth.getUid();
         RefUid = mRootRef.child(Uid);
-        RefTran = RefUid.child("Transactions");
 
-        RefCatSum = RefUid.child("CatSum");
-        RefName = RefUid.child("Name");
-        RefEmail = RefUid.child("Email");
-        RefPhnnum = RefUid.child("Phone Number");
         RefCat = RefUid.child("Categories");
-        RefUncat = RefCat.child("Uncategorised");
         AddTran = (Button) findViewById(R.id.btAddTransaction);
         Amnt = (EditText) findViewById(R.id.addTransAmt);
         ShpNm = (EditText) findViewById(R.id.addShopName);
@@ -134,7 +126,7 @@ public class Transac extends AppCompatActivity {
                     ShopName = ShpNm.getText().toString().trim();
                     if (!Amount.isEmpty() && !ShopName.isEmpty()) {
                         Tid = UUID.randomUUID().toString();
-                        RefTran.child(Tid);
+                        /*RefTran.child(Tid);
                         RefTran.child(Tid).child("Shop Name");
                         RefTran.child(Tid).child("Amount");
                         RefTran.child(Tid).child("Category");
@@ -153,7 +145,7 @@ public class Transac extends AppCompatActivity {
                         RefUid.child("CatTran").child(SelCat).child(Tid).child("ZMessage").setValue("Entered Manually...");
                         RefUid.child("CatTran").child(SelCat).child(Tid).child("Day").setValue(day);
                         RefUid.child("CatTran").child(SelCat).child(Tid).child("Month").setValue(month);
-                        RefUid.child("CatTran").child(SelCat).child(Tid).child("Year").setValue(year);
+                        RefUid.child("CatTran").child(SelCat).child(Tid).child("Year").setValue(year);*/
 
 
                         RefUid.child("DateRange").child(String.valueOf(month+"-"+year)).child("Transactions").child(Tid).child("Amount").setValue(Amount);
@@ -193,55 +185,6 @@ public class Transac extends AppCompatActivity {
                 } else {
                     Toast.makeText(getApplicationContext(), "Enter valid date", Toast.LENGTH_LONG).show();
                 }
-
-
-                RefTran.addChildEventListener(new com.firebase.client.ChildEventListener() {
-                    String amount, cat, shname, shDay, shMonth, shYear;
-
-                    @Override
-                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        int i = 0;
-
-                        for (DataSnapshot S : dataSnapshot.getChildren()) {
-
-                            switch (i) {
-                                case 0:
-                                    amount = S.getValue().toString().trim();
-                                    break;
-                                case 1:
-                                    cat = S.getValue().toString().trim();
-                                    break;
-
-                            }
-
-                            i++;
-                        }
-                        catgTrans.put(cat, amount);
-
-                    }
-
-                    @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                    }
-
-                    @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                    }
-
-                    @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                    }
-
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-
-                    }
-                });
-
-
 
 
                 RefTran1.addChildEventListener(new com.firebase.client.ChildEventListener() {
@@ -325,20 +268,10 @@ public class Transac extends AppCompatActivity {
     }
 
     public void onBackPressed() {
-        Iterator<String> mapIter = catgTrans.keySet().iterator();
         Iterator<String> mapIter1 = catgTrans1.keySet().iterator();
 
 
-        if(mapIter.hasNext() && mapIter1.hasNext()) {
-            while (mapIter.hasNext()) {
-                String key = mapIter.next();
-//                    Toast.makeText(getApplicationContext(), "Value: " + key + ":" + catgTrans.get(key), Toast.LENGTH_SHORT).show();
-
-                Collection<String> val = catgTrans.getCollection(key);
-                SumTrans obj = new SumTrans();
-                RefCatSum.child(key).setValue(obj.computeSum(val).toString());
-
-            }
+        if(mapIter1.hasNext()) {
 
             while (mapIter1.hasNext()) {
                 String key = mapIter1.next();

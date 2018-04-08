@@ -25,6 +25,7 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.sql.Ref;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -36,7 +37,7 @@ import java.util.List;
 public class TabFragment extends Fragment {
     private Firebase mRootRef;
     private Firebase RefUid,RefTran,RefCatTran,RefCatSum, RefCat;
-    int pos, intSum;
+    int pos, intSum, currentDay,currentMonth,currentYear;
     private String tagId, delCategory, delAmt, catChangeTo;
     private TextView textView;
 
@@ -78,9 +79,9 @@ public class TabFragment extends Fragment {
 
 
         Calendar calendar = Calendar.getInstance();
-        int currentDay = (calendar.get(Calendar.DAY_OF_MONTH));
-        int currentMonth = (calendar.get(Calendar.MONTH)+1);
-        int currentYear = (calendar.get(Calendar.YEAR));
+        currentDay = (calendar.get(Calendar.DAY_OF_MONTH));
+        currentMonth = (calendar.get(Calendar.MONTH)+1);
+        currentYear = (calendar.get(Calendar.YEAR));
         mRootRef=new Firebase("https://expense-2a69a.firebaseio.com/");
 
         mRootRef.keepSynced(true);
@@ -174,8 +175,8 @@ public class TabFragment extends Fragment {
                 // Toast.makeText(getActivity(),tagId+"-"+"Delete it",Toast.LENGTH_SHORT).show();
 
                 RefTran.child(tagId).removeValue();
-                RefCatTran.child(delCategory).child(tagId).removeValue();
-                RefCatSum.child(delCategory).addListenerForSingleValueEvent(new ValueEventListener() {
+                RefUid.child("DateRange").child(currentMonth+"-"+currentYear).child("CatTran").child(delCategory).child(tagId).removeValue();
+                RefUid.child("DateRange").child(currentMonth+"-"+currentYear).child("CatSum").child(delCategory).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         String sumCat = dataSnapshot.getValue().toString().trim();
